@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hunt Club">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0a0c">
+<title>Hunt Club</title>
+<link rel="apple-touch-icon" href="assets/icon.webp">
+<link rel="icon" href="assets/icon.webp">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;position:fixed;width:100%}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;transition:background .6s ease}
+
+:root{
+  --bg:#0b0a0c; --panel:#16131680; --line:#2c262b; --ink:#ece5dc; --dim:#9a8f88;
+  --accent:#b5432f; --accent2:#c9a24a; --ok:#6f8f5e; --bad:#a33a33;
+  --display:'Cinzel',Georgia,serif; --serif:'Cormorant Garamond',Georgia,serif;
+}
+body[data-pack="villa"]{--bg:#0d0907;--panel:#1a120d80;--line:#3a2a1d;--ink:#efe4d2;--dim:#a8927a;--accent:#b5432f;--accent2:#c9a24a}
+body[data-pack="casa"]{--bg:#0a0b0d;--panel:#12151a80;--line:#252c33;--ink:#dfe4e8;--dim:#8794a0;--accent:#7a3b52;--accent2:#b08d57}
+
+/* ============ PANTALLA DE ARRANQUE ============ */
+#splash{position:fixed;inset:0;z-index:200;display:grid;place-items:center;
+  background:radial-gradient(70% 55% at 50% 42%,#15131c 0%,#0b0a0c 62%,#060507 100%);
+  transition:opacity .55s ease,visibility .55s}
+#splash.out{opacity:0;visibility:hidden}
+.splashwrap{text-align:center;transform:translateY(-6%)}
+.emblem{width:190px;height:190px;position:relative;margin:0 auto 26px;
+  animation:emIn 1.1s cubic-bezier(.2,.9,.25,1) both}
+.emblem img{width:100%;height:100%;display:block;
+  clip-path:circle(41.5% at 49.2% 50%);
+  filter:drop-shadow(0 0 26px rgba(201,162,74,.28)) drop-shadow(0 14px 34px rgba(0,0,0,.6))}
+.emblem::after{content:'';position:absolute;inset:7.5%;border-radius:50%;pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(201,162,74,.35),0 0 60px rgba(201,162,74,.12)}
+@keyframes emIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+.splashwrap h1{font-family:var(--display);font-weight:600;font-size:27px;color:#e8dcc4;
+  letter-spacing:.42em;margin-left:.42em;animation:tIn .9s .28s cubic-bezier(.2,.9,.25,1) both}
+.splashwrap .stag{font-family:var(--serif);font-style:italic;font-size:15px;color:#8d8279;margin-top:9px;
+  animation:tIn .9s .46s cubic-bezier(.2,.9,.25,1) both}
+@keyframes tIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.splashwrap .rule{width:46px;height:1px;background:linear-gradient(90deg,transparent,#c9a24a80,transparent);
+  margin:16px auto 0;animation:tIn .9s .6s both}
+
+/* ============ ARMAZÓN ============ */
+#app{height:100dvh;display:flex;flex-direction:column;max-width:520px;margin:0 auto;position:relative;overflow:hidden}
+#app::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(120% 80% at 50% -10%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 60%)}
+
+#top{flex:0 0 auto;padding:calc(env(safe-area-inset-top) + 12px) 16px 10px;
+  display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line);position:relative;z-index:2}
+#top .ttl{font-family:var(--display);font-size:12px;letter-spacing:.15em;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dim)}
+.pill{font-size:11px;letter-spacing:.09em;padding:6px 10px;border:1px solid var(--line);border-radius:999px;
+  color:var(--dim);white-space:nowrap;background:var(--panel)}
+.pill b{color:var(--accent2);font-weight:600}
+.pill.low b{color:var(--bad)}
+.pill.act{border-color:color-mix(in srgb,var(--accent) 60%,transparent);color:var(--ink);
+  font-family:var(--display);letter-spacing:.14em;font-size:10.5px;cursor:pointer}
+.pill.act:active{background:color-mix(in srgb,var(--accent) 24%,transparent)}
+#topL:empty{display:none}
+.iconbtn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--panel);
+  color:var(--dim);font-size:19px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0 2px 2px 0}
+.iconbtn:active{background:#ffffff12;color:var(--ink)}
+
+#screen{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  padding:16px 16px 46px;position:relative;z-index:1;overscroll-behavior:contain}
+h2.sec{font-family:var(--display);font-size:10.5px;letter-spacing:.28em;color:var(--dim);margin:0 0 12px}
+p.lead{font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--dim);margin-bottom:16px}
+
+/* ============ NAVEGACIÓN 3 PESTAÑAS CON CENTRO CIRCULAR ============ */
+#nav{flex:0 0 auto;position:relative;z-index:3;display:flex;align-items:stretch;
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);
+  background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px)}
+#nav button{flex:1;background:none;border:none;color:var(--dim);cursor:pointer;padding:12px 2px 13px;
+  font-family:'Inter',sans-serif;font-size:9.5px;letter-spacing:.13em;
+  display:flex;flex-direction:column;align-items:center;gap:5px;transition:color .25s;position:relative}
+#nav button svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round}
+#nav button.on{color:var(--accent2)}
+#nav .dot{position:absolute;top:7px;right:calc(50% - 17px);width:6px;height:6px;border-radius:50%;background:var(--accent)}
+/* botón central elevado */
+#nav button.hub{flex:0 0 96px;padding-top:0;gap:6px;justify-content:flex-end;padding-bottom:13px}
+#nav button.hub .disc{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;
+  margin-top:-27px;background:linear-gradient(160deg,#1e1a19,#100e0f);
+  border:1px solid color-mix(in srgb,var(--accent2) 42%,transparent);
+  box-shadow:0 0 0 5px var(--bg),0 8px 22px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .25s,border-color .25s,box-shadow .25s}
+#nav button.hub svg{width:25px;height:25px;stroke-width:1.4}
+#nav button.hub.on .disc{border-color:var(--accent2);
+  box-shadow:0 0 0 5px var(--bg),0 0 26px color-mix(in srgb,var(--accent2) 34%,transparent),inset 0 1px 0 rgba(255,255,255,.08)}
+#nav button.hub:active .disc{transform:scale(.94)}
+#nav button.hub .disc svg{color:var(--accent2)}
+
+/* ============ TARJETAS DE AMBIENTE ============ */
+.scard{position:relative;height:150px;border-radius:16px;overflow:hidden;margin-bottom:11px;
+  border:1px solid var(--line);cursor:pointer;transition:border-color .3s,transform .18s;isolation:isolate}
+.scard:active{transform:scale(.988)}
+.scard .scene{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;display:block}
+.scard .scrim{position:absolute;inset:0;z-index:2;
+  background:linear-gradient(180deg,#0000 0%,#0000 26%,#000a 66%,#000e 100%)}
+.scard .lab{position:absolute;left:15px;right:15px;bottom:13px;z-index:3}
+.scard .lab .n{font-family:var(--display);font-size:16px;font-weight:600;letter-spacing:.1em;
+  color:#fff;text-shadow:0 2px 10px #000c}
+.scard .lab .s{font-family:var(--serif);font-style:italic;font-size:13.5px;color:#d9cfc4;
+  margin-top:3px;text-shadow:0 1px 8px #000c}
+.scard.on{border-color:var(--accent2);box-shadow:0 0 0 1px var(--accent2),0 8px 26px #0007}
+
+.scard .mark{position:absolute;top:11px;right:12px;z-index:3;width:24px;height:24px;border-radius:50%;
+  display:grid;place-items:center;background:var(--accent2);color:#1a1207;font-size:13px;font-weight:700;
+  opacity:0;transform:scale(.6);transition:.25s}
+.scard.on .mark{opacity:1;transform:scale(1)}
+.scard.soon{cursor:default}
+.scard.soon .scrim{background:linear-gradient(180deg,#0005,#0008 58%,#000b)}
+.scard.soon .scene{filter:grayscale(.45) brightness(.58)}
+.scard.soon .lab .n{color:#9d948c}
+.scard .soonbadge{position:absolute;top:11px;right:12px;z-index:3;font-size:9px;letter-spacing:.16em;
+  font-family:var(--display);color:var(--dim);border:1px solid var(--line);border-radius:999px;
+  padding:4px 9px;background:#0009}
+
+/* ============ PLANO ============ */
+#plan{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;background:var(--line);
+  border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-bottom:13px}
+.rm{position:relative;aspect-ratio:1;overflow:hidden;background:#07060a;cursor:pointer}
+.rm .fx{position:absolute;inset:0;background-size:300% 300%;background-repeat:no-repeat;
+  filter:brightness(.34) saturate(.52);transition:filter .5s ease}
+.rm.done .fx{filter:brightness(1.04) saturate(1.04)}
+.rm.body .fx{filter:brightness(.42) saturate(.55) sepia(.3) hue-rotate(-20deg)}
+.rm.body.done .fx{filter:brightness(1.04) saturate(1.04)}
+.rm:active .fx{filter:brightness(1.15) saturate(1.1)}
+.rm.body::after{content:'';position:absolute;inset:0;border:2px solid var(--accent);pointer-events:none}
+.rm.done::after{content:'';position:absolute;inset:0;border:1.5px solid color-mix(in srgb,var(--accent2) 60%,transparent);pointer-events:none}
+.rm.body.done::after{border-color:var(--accent);border-width:2px}
+.rm .lab{position:absolute;left:0;right:0;bottom:0;padding:9px 4px 5px;text-align:center;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.72) 42%,rgba(0,0,0,.9))}
+.rm .ln{font-size:9.5px;font-weight:600;color:#fff;line-height:1.1;text-shadow:0 1px 4px #000}
+.rm .lm{font-size:7.5px;color:#c9beb4;margin-top:1.5px;line-height:1.1}
+.rm .mk,.rm .ck{position:absolute;top:4px;font-size:11px;font-weight:700;line-height:1;text-shadow:0 1px 4px #000;z-index:2}
+.rm .mk{left:5px;color:var(--accent)}
+.rm .ck{right:5px;color:var(--accent2)}
+
+/* ============ TARJETAS / PISTAS ============ */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;
+  backdrop-filter:blur(8px);position:relative}
+.card.tap{cursor:pointer}
+.card.tap:active{border-color:color-mix(in srgb,var(--accent2) 50%,transparent)}
+.row{display:flex;align-items:center;gap:12px}
+.av{flex:0 0 auto;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--display);font-size:15px;border:1px solid var(--line);
+  background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--ink)}
+.nm{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.15}
+.rl{font-size:11.5px;color:var(--dim);letter-spacing:.02em;margin-top:2px}
+.tag{display:inline-block;font-size:10px;letter-spacing:.1em;padding:3px 7px;border-radius:999px;
+  border:1px solid var(--line);color:var(--dim);margin-top:8px;margin-right:5px}
+.tag.cleared{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.tag.lie{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.tag.open{color:var(--accent2);border-color:color-mix(in srgb,var(--accent2) 40%,transparent)}
+.claim{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink);margin-top:10px;
+  padding-left:11px;border-left:2px solid color-mix(in srgb,var(--accent2) 40%,transparent);line-height:1.4}
+.clue{border-left:2px solid var(--line);padding:2px 0 2px 12px;margin-bottom:14px}
+.clue .src{font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
+.clue .txt{font-family:var(--serif);font-size:16.5px;line-height:1.45}
+.clue.obj{border-left-color:color-mix(in srgb,var(--accent2) 55%,transparent)}
+.clue.hard{border-left-color:color-mix(in srgb,var(--ok) 55%,transparent)}
+
+/* ============ CONTROLES ============ */
+.btn{display:block;width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);
+  background:transparent;color:var(--ink);font-family:var(--display);font-size:12px;letter-spacing:.2em;
+  margin-top:10px;cursor:pointer;transition:.2s}
+.btn:active{transform:scale(.985)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ghost{color:var(--dim)}
+.btn:disabled{opacity:.35}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.opt{padding:12px 10px;border:1px solid var(--line);border-radius:11px;text-align:center;
+  font-size:13px;line-height:1.3;cursor:pointer;transition:.2s;background:var(--panel)}
+.opt.on{border-color:var(--accent2);background:color-mix(in srgb,var(--accent2) 14%,transparent)}
+.opt small{display:block;color:var(--dim);font-size:10.5px;margin-top:3px}
+.chips{display:flex;gap:7px;margin-bottom:6px}
+.nums{display:flex;gap:6px;flex-wrap:wrap}
+.num{flex:1 0 34px;max-width:46px;aspect-ratio:1;display:grid;place-items:center;border:1px solid var(--line);
+  border-radius:10px;font-family:var(--display);font-size:15px;color:var(--dim);cursor:pointer;transition:.2s}
+.num.on{border-color:var(--accent2);background:color-mix(in srgb,var(--accent2) 16%,transparent);color:var(--ink)}
+.num:active{transform:scale(.93)}
+.chip{flex:1;padding:11px 6px;border:1px solid var(--line);border-radius:11px;text-align:center;
+  background:var(--panel);cursor:pointer;transition:.2s}
+.chip .cn{font-size:12.5px;font-weight:500}
+.chip .cs{display:block;color:var(--dim);font-size:10px;margin-top:3px}
+.chip.on{border-color:var(--accent2);background:color-mix(in srgb,var(--accent2) 14%,transparent)}
+.seedrow{display:flex;gap:8px;align-items:stretch;margin-bottom:7px}
+.code{font-family:var(--display);font-size:20px;letter-spacing:.3em;text-align:center;color:var(--accent2);
+  padding:14px;border:1px dashed var(--line);border-radius:12px;background:var(--panel)}
+input.code{flex:1;min-width:0;background:var(--panel);border:1px dashed var(--line);
+  text-transform:uppercase;outline:none;-webkit-user-select:text;user-select:text}
+.reroll{flex:0 0 52px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+  color:var(--accent2);font-size:20px;cursor:pointer}
+.reroll:active{transform:scale(.94)}
+.note{font-size:11.5px;color:var(--dim);line-height:1.5;text-align:center}
+
+/* ============ ARCHIVO / CLUB ============ */
+.stat3{display:flex;gap:10px;margin-bottom:14px}
+.stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px 8px;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:23px;color:var(--accent2);line-height:1}
+.stat span{display:block;font-size:10px;letter-spacing:.11em;color:var(--dim);margin-top:6px}
+.rank{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:14px;
+  position:relative;overflow:hidden}
+.rank::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(90% 130% at 100% 0,color-mix(in srgb,var(--accent2) 15%,transparent),transparent 62%)}
+.rank .rn{font-family:var(--display);font-size:20px;letter-spacing:.14em;position:relative}
+.rank .rd{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--dim);margin-top:5px;position:relative}
+.bar{height:5px;border-radius:99px;background:#ffffff12;margin-top:14px;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width .7s cubic-bezier(.2,.9,.25,1)}
+.meds{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.med{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px;opacity:.42;transition:.35s}
+.med.got{opacity:1;border-color:color-mix(in srgb,var(--accent2) 42%,transparent)}
+.med .mi{font-size:19px;letter-spacing:.14em;line-height:1;margin-bottom:7px}
+.med .mn{font-size:12px;font-weight:600;line-height:1.25}
+.med .md{font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.35}
+.logrow{display:flex;align-items:center;gap:12px;padding:12px 13px;border:1px solid var(--line);
+  border-radius:13px;background:var(--panel);margin-bottom:8px;cursor:pointer}
+.logrow:active{border-color:color-mix(in srgb,var(--accent2) 45%,transparent)}
+.logrow .vd{flex:0 0 auto;width:9px;height:9px;border-radius:50%}
+.logrow .vd.win{background:var(--ok);box-shadow:0 0 10px color-mix(in srgb,var(--ok) 60%,transparent)}
+.logrow .vd.lose{background:var(--bad)}
+.logrow .vd.ab{background:var(--dim);opacity:.55}
+.logrow .lc{font-family:var(--display);font-size:13px;letter-spacing:.17em;color:var(--ink)}
+.logrow .lm{font-size:11px;color:var(--dim);margin-top:3px}
+.logrow .lr{margin-left:auto;text-align:right;font-size:10.5px;color:var(--dim);letter-spacing:.06em}
+.empty{text-align:center;padding:34px 18px;color:var(--dim)}
+.empty .ei{font-size:31px;opacity:.4;margin-bottom:12px}
+.empty .et{font-family:var(--serif);font-style:italic;font-size:16.5px;line-height:1.5}
+
+/* ============ HOJA MODAL ============ */
+#modal{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;justify-content:center}
+#modal.on{display:flex}
+#modal .bd{position:absolute;inset:0;background:#000b;backdrop-filter:blur(3px)}
+#modal .sheet{position:relative;width:100%;max-width:520px;max-height:88dvh;overflow-y:auto;
+  background:var(--bg);border:1px solid var(--line);border-bottom:none;border-radius:20px 20px 0 0;
+  padding:22px 18px calc(env(safe-area-inset-bottom) + 20px);
+  animation:up .32s cubic-bezier(.2,.8,.3,1);overscroll-behavior:contain}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+#modal h3{font-family:var(--display);font-size:15px;letter-spacing:.14em;margin-bottom:14px}
+
+/* ============ HERO / FINAL ============ */
+.hero{text-align:center;padding:14px 0 18px}
+.hero h1{font-family:var(--display);font-size:29px;letter-spacing:.26em;margin-bottom:9px;margin-left:.26em}
+.hero .sub{font-family:var(--serif);font-style:italic;font-size:16.5px;color:var(--dim)}
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:20px 0}
+.verdict{font-family:var(--display);font-size:24px;letter-spacing:.2em;text-align:center;margin-bottom:6px}
+.verdict.win{color:var(--ok)} .verdict.lose{color:var(--bad)}
+</style>
+</head>
+<body data-pack="villa">
+
+<div id="splash">
+  <div class="splashwrap">
+    <div class="emblem"><img src="assets/icon.webp" alt=""></div>
+    <h1>HUNT CLUB</h1>
+    <div class="stag">Nadie dice toda la verdad</div>
+    <div class="rule"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div id="top"><div id="topL"></div><div class="ttl" id="topTtl">HUNT CLUB</div><div id="topR" style="display:flex;gap:8px"></div></div>
+  <div id="screen"></div>
+  <nav id="nav"></nav>
+</div>
+<div id="modal"><div class="bd"></div><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* ---------- PRNG determinista: el código de caso ES la semilla ---------- */
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const pick=(arr,r)=>arr[Math.floor(r()*arr.length)];
+/* nombre de sala con artículo, para el texto corrido; a secas sirve de etiqueta */
+const SALA=(P,i)=>P.rooms[i].art+P.rooms[i].n;
+function shuffle(a,r){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function neighbors(i){const R=Math.floor(i/3),C=i%3,n=[];
+  if(R>0)n.push(i-3); if(R<2)n.push(i+3); if(C>0)n.push(i-1); if(C<2)n.push(i+1); return n}
+
+/* ============================================================
+   PAQUETES DE AMBIENTACIÓN
+   ============================================================ */
+const PACKS={
+
+villa:{
+ id:'villa', nombre:'Villa romana', epigrafe:'Roma, 61 d.C. · la villa de los Valerio',
+ lugar:'la villa', corto:'VILLA VALERIO', cuerpo:'el cuerpo', forenseIdx:4, forenseQuien:'Demetrio, el médico,', forenseAlt:'Un médico traído de la ciudad al amanecer',
+ horas:['el ocaso','la primera vigilia','la segunda vigilia','la tercera vigilia','el alba'],
+ horaCrimen:'la segunda vigilia',
+ victima:{n:'Quinto Valerio Rufo',r:'senador, dueño de la villa',g:'m'},
+ escena:['Hubo banquete hasta bien entrada la noche. Vino de Falerno, músicos, seis invitados bajo el mismo techo y las puertas de la villa cerradas por dentro desde el ocaso.',
+  'Cuando las lámparas se apagaron, Quinto Valerio Rufo llevaba ya un rato muerto.',
+  'Nadie entró de fuera. Uno de los seis lo mató, y los demás tampoco estaban donde dicen que estaban — pero por otras razones, y ninguna de ellas la quieren contar.',
+  'Tienes hasta el alba.'],
+ rooms:[
+  {n:'Atrium',d:'el patio de entrada',mat:'polvo de mármol',a:'columnas',art:'el '},
+  {n:'Tablinum',d:'el despacho del senador',mat:'yeso rojo',a:'escritorio',art:'el '},
+  {n:'Cubiculum',d:'la alcoba principal',mat:'polvo de mármol',a:'cama',art:'el '},
+  {n:'Culina',d:'la cocina',mat:'hollín',a:'cocina',art:'la '},
+  {n:'Peristylum',d:'el jardín porticado',mat:'tierra húmeda',a:'patio',art:'el '},
+  {n:'Balneum',d:'los baños',mat:'sal de baño',a:'bano',art:'el '},
+  {n:'Cella vinaria',d:'la bodega',mat:'tierra húmeda',a:'bodega',art:'la '},
+  {n:'Triclinium',d:'el comedor del banquete',mat:'yeso rojo',a:'mesa',art:'el '},
+  {n:'Lararium',d:'la capilla de los antepasados',mat:'hollín',a:'altar',art:'el '}
+ ],
+ chars:[
+  {n:'Livia Metela',r:'esposa del senador',ini:'L',obj:'un pasador de marfil'},
+  {n:'Marco Valerio',r:'hijo mayor',ini:'M',obj:'un anillo con el sello de los Valerio'},
+  {n:'Cornelia',r:'hija menor',ini:'C',obj:'una cinta teñida de púrpura'},
+  {n:'Aulo Vibio',r:'liberto, administra la hacienda',ini:'A',obj:'una tablilla de cera con cuentas'},
+  {n:'Demetrio',r:'médico griego de la casa',ini:'D',obj:'una redoma de vidrio verde'},
+  {n:'Fausta',r:'esclava de cocina',ini:'F',obj:'un amuleto de hueso'}
+ ],
+ means:[
+  {n:'una daga hispana',t:'hoja'},
+  {n:'el punzón del escriba',t:'hoja'},
+  {n:'una lámpara de bronce',t:'golpe'},
+  {n:'la estatuilla de Minerva',t:'golpe'},
+  {n:'cicuta en la copa',t:'veneno'},
+  {n:'adelfa molida en los higos',t:'veneno'}
+ ],
+ tagTxt:{hoja:'un arma de hoja, estrecha y muy afilada',golpe:'un golpe seco con algo pesado y romo',veneno:'un veneno administrado por la boca'},
+ descarte:[
+  'sigue en su sitio, con el polvo sin remover',
+  'no ha salido del arcón donde se guarda',
+  'no tiene rastro de sangre ni señal de uso reciente',
+  'pasó la noche entera en manos de un esclavo, a la vista de todos',
+  'quedó bajo llave, y la llave no se movió'
+ ],
+ secretos:[
+  'conspiraba con dos tribunos contra el senador',
+  'mantenía un amorío que habría costado la vida a los dos',
+  'llevaba tres años desviando fondos de la hacienda',
+  'oficiaba ritos prohibidos a una diosa de Oriente',
+  'había falsificado una cláusula del testamento',
+  'vendía al rival del senador todo lo que oía en el tablinum',
+  'escondía en la villa a un esclavo fugado'
+ ],
+ confesion:['No maté a nadie. Pero sí estuve allí, y no puedo decir por qué sin perderlo todo.',
+            'Está bien. Mentí. Mentí porque la verdad es otra cosa, no un asesinato.',
+            'Si digo dónde estuve, lo pierdo todo igualmente. Pero no maté al senador.'],
+ negacion:['No tengo nada que esconder, y eso no prueba nada contra mí.',
+           'Esa pieza puede estar ahí por cien razones. Buscas mal.',
+           'Te equivocas de persona, y mientras tanto la noche se te acaba.']
+},
+
+casa:{
+ id:'casa', nombre:'Mansión, 1928', epigrafe:'Santander, 1928 · Casa Quintanar',
+ lugar:'la casa', corto:'CASA QUINTANAR', cuerpo:'el cuerpo', forenseIdx:4, forenseQuien:'el doctor Herrán', forenseAlt:'El forense llegado de Santander',
+ horas:['antes de la cena','la cena','la hora del café','la partida de billar','antes del amanecer'],
+ horaCrimen:'la hora del café',
+ victima:{n:'Don Fermín Quintanar',r:'industrial, dueño de la casa',g:'m'},
+ escena:['Llovía sobre la bahía y la cena se alargó. Seis personas en la casa, el servicio incluido, y el portón cerrado con llave desde las ocho.',
+  'Cuando sirvieron el café, don Fermín Quintanar ya no bajó a tomarlo.',
+  'De fuera no entró nadie. Uno de los seis lo mató, y ninguno de los demás estaba donde dice que estaba — por motivos suyos, que preferirían llevarse a la tumba.',
+  'Tienes hasta que amanezca.'],
+ rooms:[
+  {n:'Vestíbulo',d:'la entrada principal',mat:'cera de suelo',a:'entrada',art:'el '},
+  {n:'Despacho',d:'el escritorio de don Fermín',mat:'ceniza de tabaco',a:'escritorio',art:'el '},
+  {n:'Dormitorio',d:'la alcoba principal',mat:'polvo de yeso',a:'cama',art:'el '},
+  {n:'Cocina',d:'la cocina y la despensa',mat:'ceniza de carbón',a:'cocina',art:'la '},
+  {n:'Invernadero',d:'las plantas del patio cubierto',mat:'tierra de macetas',a:'invernadero',art:'el '},
+  {n:'Biblioteca',d:'los libros y la chimenea',mat:'ceniza de tabaco',a:'libros',art:'la '},
+  {n:'Bodega',d:'el sótano del vino',mat:'tierra de macetas',a:'bodega',art:'la '},
+  {n:'Comedor',d:'la mesa larga',mat:'cera de suelo',a:'mesa',art:'el '},
+  {n:'Billar',d:'la sala de juego',mat:'polvo de yeso',a:'billar',art:'el '}
+ ],
+ chars:[
+  {n:'Amparo Quintanar',r:'la viuda',ini:'A',obj:'un guante de cabritilla'},
+  {n:'Ignacio Quintanar',r:'hermano del difunto',ini:'I',obj:'una pitillera de plata'},
+  {n:'Elvira Sanz',r:'institutriz',ini:'E',obj:'unas gafas de concha'},
+  {n:'Ramón Coloma',r:'secretario personal',ini:'R',obj:'una estilográfica con iniciales'},
+  {n:'Doctor Herrán',r:'médico de la familia',ini:'H',obj:'una tarjeta de visita doblada'},
+  {n:'Sagrario',r:'ama de llaves',ini:'S',obj:'un manojo de llaves'}
+ ],
+ means:[
+  {n:'el abrecartas del despacho',t:'hoja'},
+  {n:'la navaja de afeitar',t:'hoja'},
+  {n:'el atizador de la chimenea',t:'golpe'},
+  {n:'el candelabro de bronce',t:'golpe'},
+  {n:'láudano en la copa de coñac',t:'veneno'},
+  {n:'matarratas en el café',t:'veneno'}
+ ],
+ tagTxt:{hoja:'una hoja fina y muy afilada',golpe:'un golpe contundente con un objeto pesado',veneno:'un tóxico ingerido'},
+ descarte:[
+  'sigue donde siempre, bajo un polvo que nadie ha tocado',
+  'no ha salido del cajón, que estaba cerrado con llave',
+  'no presenta sangre ni marca alguna de uso',
+  'anduvo toda la noche en manos del servicio',
+  'apareció en su funda, con el precinto sin romper'
+ ],
+ secretos:[
+  'arrastraba deudas de juego que no podía pagar',
+  'mantenía una relación que habría destruido a la familia',
+  'llevaba meses vendiendo acciones a espaldas de todos',
+  'sufría el chantaje de alguien de fuera de la casa',
+  'había falsificado la última firma del testamento',
+  'pasaba información a un competidor de la fábrica',
+  'ocultaba un pasado y un nombre distinto del suyo'
+ ],
+ confesion:['No lo maté. Pero estuve allí, y decir por qué me arruina igual.',
+            'Mentí, sí. Por algo que no tiene nada que ver con su muerte.',
+            'Está bien, no estuve donde dije. Y sigo sin haber matado a nadie.'],
+ negacion:['Eso no prueba nada, y usted lo sabe.',
+           'Puede estar ahí por mil motivos. Se equivoca de puerta.',
+           'Insista cuanto quiera. La noche se le está acabando a usted, no a mí.']
+},
+
+monasterio:{
+ id:'monasterio', nombre:'Monasterio', epigrafe:'Castilla, 1327 · San Zoilo de Vallehondo',
+ lugar:'el monasterio', corto:'SAN ZOILO', cuerpo:'el cuerpo',
+ forenseIdx:5, forenseQuien:'Fray Isidro, el enfermero,', forenseAlt:'Un físico llegado del obispado',
+ horas:['completas','el gran silencio','maitines','laudes','prima'],
+ horaCrimen:'el gran silencio',
+ victima:{n:'Fray Bernardo de Osma',r:'abad del monasterio',g:'m'},
+ escena:['Nevaba desde vísperas y el portón llevaba cerrado con tranca desde completas. Dentro, seis hombres y una regla que obliga a callar entre completas y maitines.',
+  'A maitines, la silla del abad estaba vacía. Lo encontraron poco después, y no había muerto rezando.',
+  'De fuera no entró nadie: la nieve del claustro estaba sin pisar salvo por dentro. Uno de los seis lo mató. Y ninguno de los otros estuvo donde jura que estuvo, porque en el gran silencio cada uno andaba en lo suyo.',
+  'Tienes hasta prima.'],
+ rooms:[
+  {n:'Iglesia',    d:'la nave y el altar mayor',      mat:'polvo de sillar',      a:'altar',art:'la '},
+  {n:'Scriptorium',d:'donde se copian los códices',   mat:'serrín de pergamino',  a:'escritura',art:'el '},
+  {n:'Biblioteca', d:'los armarios de libros',        mat:'serrín de pergamino',  a:'libros',art:'la '},
+  {n:'Refectorio', d:'el comedor de la comunidad',    mat:'ceniza de leña',       a:'mesa',art:'el '},
+  {n:'Claustro',   d:'el patio de arcos',             mat:'tierra de huerto',     a:'patio',art:'el '},
+  {n:'Cocina',     d:'los fogones y la despensa',     mat:'ceniza de leña',       a:'cocina',art:'la '},
+  {n:'Bodega',     d:'las tinajas y el vino de misa', mat:'tierra de huerto',     a:'bodega',art:'la '},
+  {n:'Celdas',     d:'los dormitorios de los monjes', mat:'polvo de sillar',      a:'camas',art:'las '},
+  {n:'Enfermería', d:'donde se cuida a los viejos',   mat:'cal viva',             a:'enfermeria',art:'la '}
+ ],
+ chars:[
+  {n:'Fray Anselmo',  r:'prior, segundo del abad',      ini:'A',obj:'un rosario de cuentas de hueso'},
+  {n:'Fray Gil',      r:'bibliotecario',                ini:'G',obj:'unas lentes de berilo'},
+  {n:'Fray Tomás',    r:'copista, el más joven',        ini:'T',obj:'un cálamo con la punta partida'},
+  {n:'Fray Melchor',  r:'cillerero, lleva las cuentas', ini:'M',obj:'una llave de hierro de la bodega'},
+  {n:'Hermano Lucas', r:'lego, cuida la huerta',        ini:'L',obj:'un guante de cuero endurecido'},
+  {n:'Fray Isidro',   r:'enfermero',                    ini:'I',obj:'un frasco de vidrio turbio'}
+ ],
+ means:[
+  {n:'el cuchillo de podar del huerto',t:'hoja'},
+  {n:'la raedera de raspar pergamino', t:'hoja'},
+  {n:'un candelabro de hierro',        t:'golpe'},
+  {n:'la maza del campanario',         t:'golpe'},
+  {n:'cicuta en el vino de misa',      t:'veneno'},
+  {n:'beleño molido en el caldo',      t:'veneno'}
+ ],
+ tagTxt:{hoja:'una hoja estrecha y bien afilada',golpe:'un golpe seco con algo pesado y romo',veneno:'un veneno tomado por la boca'},
+ descarte:[
+  'sigue colgando de su alcayata, con el polvo sin tocar',
+  'no ha salido del arca, que cierra con tranca',
+  'no presenta sangre ni señal de haberse usado',
+  'anduvo toda la noche en manos del hermano lego',
+  'quedó bajo llave desde vísperas, y la llave no se movió'
+ ],
+ secretos:[
+  'guardaba en su celda un libro condenado por el obispo',
+  'llevaba años desviando el diezmo del grano',
+  'mantenía correspondencia con unos hermanos del Libre Espíritu',
+  'había fabricado con sus manos la reliquia que atrae a los peregrinos',
+  'recibía en la bodega a una mujer del valle',
+  'sabía que el título de las tierras del monasterio era falso',
+  'copiaba de noche un tratado que le habían prohibido tocar'
+ ],
+ confesion:['No maté al abad. Pero estuve allí, y decir por qué me lleva a la hoguera.',
+            'Mentí, sí. Por una cosa mía que nada tiene que ver con su muerte.',
+            'Está bien: no estuve donde dije. Y sigo sin haber matado a nadie.'],
+ negacion:['Eso no prueba nada, y lo sabéis tan bien como yo.',
+           'Esa pieza pudo quedar ahí de cien maneras. Buscáis mal.',
+           'Insistid cuanto queráis. La noche se os acaba a vos, no a mí.']
+},
+
+cuartel:{
+ id:'cuartel', nombre:'Cuartel en guerra', epigrafe:'Normandía, 1944 · granja requisada',
+ lugar:'el puesto', corto:'PUESTO DE MANDO', cuerpo:'el cuerpo',
+ forenseIdx:4, forenseQuien:'Sanz, el médico de la unidad,', forenseAlt:'Un médico del batallón vecino',
+ horas:['el toque de queda','la primera guardia','la guardia de medianoche','la última guardia','diana'],
+ horaCrimen:'la guardia de medianoche',
+ victima:{n:'el capitán Ramiro Bielsa',r:'al mando de la compañía',g:'m'},
+ escena:['Una granja requisada a diez kilómetros del frente, con orden de silencio de radio y el perímetro cerrado desde el toque de queda. Seis personas dentro y un centinela en la puerta que no vio entrar a nadie.',
+  'Bielsa no apareció en el relevo de la última guardia. Lo encontró el cabo de cuartel, y el capitán no había muerto de metralla.',
+  'Nadie cruzó el perímetro. Uno de los seis lo mató. Los demás tampoco estaban en su puesto, y en una unidad en campaña eso es consejo de guerra aunque no hayas matado a nadie.',
+  'Tienes hasta diana.'],
+ rooms:[
+  {n:'Sala de mapas',d:'donde se planean los avances',    mat:'polvo de yeso',   a:'mapas',art:'la '},
+  {n:'Despacho',     d:'la mesa del capitán y la caja',   mat:'polvo de yeso',   a:'escritorio',art:'el '},
+  {n:'Radio',        d:'los equipos y el libro de claves',mat:'grasa de máquina',a:'radio',art:'la '},
+  {n:'Taller',       d:'donde se repara el material',     mat:'grasa de máquina',a:'taller',art:'el '},
+  {n:'Patio',        d:'el corral de la granja',          mat:'barro seco',      a:'patio',art:'el '},
+  {n:'Establo',      d:'convertido en garaje',            mat:'barro seco',      a:'establo',art:'el '},
+  {n:'Dormitorio',   d:'los catres de la tropa',          mat:'paja',            a:'camas',art:'el '},
+  {n:'Cocina',       d:'el rancho y la leña',             mat:'paja',            a:'cocina',art:'la '},
+  {n:'Enfermería',   d:'dos camastros y poco más',        mat:'yodo derramado',  a:'enfermeria',art:'la '}
+ ],
+ chars:[
+  {n:'Arturo Prats',  r:'teniente, segundo al mando',   ini:'P',obj:'unos prismáticos con la correa rota'},
+  {n:'Elías Mur',     r:'sargento, jefe de pelotón',    ini:'M',obj:'una chapa de identificación doblada'},
+  {n:'Nicolás Ferrer',r:'cabo radiotelegrafista',       ini:'F',obj:'un lápiz de claves mordisqueado'},
+  {n:'Simone Bardet', r:'enlace de la resistencia',     ini:'B',obj:'un pañuelo con iniciales bordadas'},
+  {n:'Darío Sanz',    r:'médico de la unidad',          ini:'S',obj:'una ampolla vacía de morfina'},
+  {n:'Julián Espada', r:'conductor y mecánico',         ini:'E',obj:'un guante de faena lleno de grasa'}
+ ],
+ means:[
+  {n:'una bayoneta',                  t:'hoja'},
+  {n:'la navaja de intendencia',      t:'hoja'},
+  {n:'la culata de un fusil',         t:'golpe'},
+  {n:'una llave inglesa del taller',  t:'golpe'},
+  {n:'morfina en dosis doble',        t:'veneno'},
+  {n:'matarratas en el café de rancho',t:'veneno'}
+ ],
+ tagTxt:{hoja:'una hoja larga y afilada, no metralla',golpe:'un golpe contundente con algo pesado',veneno:'un tóxico que entró por la boca o por la vena'},
+ descarte:[
+  'sigue en el armero, con el precinto de la última revista sin romper',
+  'no ha salido de la caja de intendencia, cerrada con candado',
+  'no presenta sangre ni marca de uso',
+  'anduvo toda la noche en manos del centinela',
+  'figura en el parte del furriel, en su sitio y sin tocar'
+ ],
+ secretos:[
+  'llevaba semanas pasando partes a un oficial de otra unidad',
+  'había desertado en el 39 y servía con nombre falso',
+  'vendía material de intendencia en el pueblo de al lado',
+  'mantenía una relación que en campaña cuesta el destino',
+  'escondía a un prisionero alemán en lugar de entregarlo',
+  'falsificó los partes de bajas de la última operación',
+  'se estaba quedando con el dinero de las cartillas de los muertos'
+ ],
+ confesion:['Yo no lo maté. Pero no estaba en mi puesto, y decir dónde estaba me cuesta el uniforme.',
+            'Mentí. Por algo mío, que no tiene nada que ver con el capitán.',
+            'Está bien: no estuve donde dije. Sigo sin haber matado a nadie.'],
+ negacion:['Eso no prueba nada y usted lo sabe.',
+           'Esa cosa pudo quedarse ahí de mil maneras. Se equivoca de puerta.',
+           'Insista lo que quiera. A quien se le acaba la noche es a usted.']
+},
+
+cortijo:{
+ id:'cortijo', nombre:'Cortijo andaluz', epigrafe:'Jaén, 1931 · Cortijo de los Almendros',
+ lugar:'el cortijo', corto:'LOS ALMENDROS', cuerpo:'el cuerpo',
+ forenseIdx:4, forenseQuien:'don Aurelio, el médico del pueblo,', forenseAlt:'El forense llegado de Úbeda',
+ horas:['el atardecer','la cena','la noche cerrada','la madrugada','el alba'],
+ horaCrimen:'la noche cerrada',
+ victima:{n:'don Ventura Alcaraz',r:'el señorito, dueño del cortijo',g:'m'},
+ escena:['Se acabó la trilla y hubo vino para todos. El cortijo quedó cerrado a cal y canto, con los perros sueltos en la era y seis personas durmiendo bajo el mismo techo.',
+  'Los perros no ladraron en toda la noche. Al alba, don Ventura Alcaraz llevaba horas muerto.',
+  'De fuera no entró nadie: los perros lo habrían dicho. Uno de los seis lo mató. Y ninguno de los demás estaba donde dice, cada cual por un asunto que en un pueblo de mil habitantes no se puede contar.',
+  'Tienes hasta que suba el sol.'],
+ rooms:[
+  {n:'Zaguán',  d:'la entrada empedrada',          mat:'polvo de cal',      a:'entrada',art:'el '},
+  {n:'Señorío', d:'las habitaciones del dueño',    mat:'polvo de cal',      a:'cama',art:'el '},
+  {n:'Cocina',  d:'la lumbre y la despensa',       mat:'ceniza de olivo',   a:'cocina',art:'la '},
+  {n:'Capilla', d:'la ermita de la familia',       mat:'ceniza de olivo',   a:'altar',art:'la '},
+  {n:'Patio',   d:'el pozo y los naranjos',        mat:'tierra de albero',  a:'patio',art:'el '},
+  {n:'Cuadras', d:'las bestias y los aperos',      mat:'tierra de albero',  a:'establo',art:'las '},
+  {n:'Molino',  d:'la almazara y las prensas',     mat:'orujo',             a:'molino',art:'el '},
+  {n:'Granero', d:'el grano y la paja de la era',  mat:'orujo',             a:'granero',art:'el '},
+  {n:'Bodega',  d:'las orzas del aceite',          mat:'aceite derramado',  a:'bodega',art:'la '}
+ ],
+ chars:[
+  {n:'Rosario Alcaraz', r:'viuda del hermano mayor',  ini:'R',obj:'un abanico de varillas rotas'},
+  {n:'Curro Alcaraz',   r:'el hijo del señorito',     ini:'C',obj:'una petaca de plata con iniciales'},
+  {n:'Encarna Robles',  r:'ama de llaves',            ini:'E',obj:'un dedal de coser'},
+  {n:'Sebastián Nieto', r:'el capataz',               ini:'N',obj:'una vara de fresno marcada a fuego'},
+  {n:'Aurelio Cuadros', r:'médico del pueblo',        ini:'A',obj:'un maletín con el cierre forzado'},
+  {n:'Remedios Lara',   r:'jornalera de la trilla',   ini:'L',obj:'un pañuelo de lunares'}
+ ],
+ means:[
+  {n:'la navaja cabritera',        t:'hoja'},
+  {n:'una hoz de segar',           t:'hoja'},
+  {n:'la vara del capataz',        t:'golpe'},
+  {n:'una pesa de la almazara',    t:'golpe'},
+  {n:'adelfa machacada en el vino',t:'veneno'},
+  {n:'matarratas en el gazpacho',  t:'veneno'}
+ ],
+ tagTxt:{hoja:'una hoja fina y muy afilada',golpe:'un golpe seco con algo pesado y romo',veneno:'un veneno que se tomó con la comida'},
+ descarte:[
+  'sigue colgando de su gancho, con el polvo sin remover',
+  'no ha salido del arcón, que cierra con llave',
+  'no presenta sangre ni señal de uso',
+  'anduvo toda la noche en manos de un jornalero',
+  'quedó bajo llave, y la llave no se movió del clavo'
+ ],
+ secretos:[
+  'llevaba tres cosechas falseando los jornales del libro',
+  'tenía un hijo con alguien de la casa y nadie debía saberlo',
+  'organizaba en el granero las reuniones del sindicato',
+  'había vendido aceite en negro a espaldas del señorito',
+  'le debía al señorito un dinero de juego que no podía pagar',
+  'guardaba el testamento viejo, el que no dejaba nada al hijo',
+  'escondía en la bodega a un primo huido de la Guardia Civil'
+ ],
+ confesion:['Yo no lo maté. Pero allí estuve, y si digo por qué, en este pueblo no vuelvo a trabajar.',
+            'Mentí, sí señor. Por cosa mía, que no tiene que ver con la muerte de don Ventura.',
+            'Está bien: no estuve donde dije. Y aun así no maté a nadie.'],
+ negacion:['Eso no prueba nada, y usted lo sabe de sobra.',
+           'Esa cosa puede estar ahí por mil razones. Se equivoca de puerta.',
+           'Usted siga. A quien se le está acabando la noche es a usted.']
+},
+
+tren:{
+ id:'tren', nombre:'Tren nocturno', epigrafe:'Los Alpes, 1931 · expreso de medianoche',
+ lugar:'el tren', corto:'EXPRESO ALPINO', cuerpo:'el cuerpo',
+ forenseIdx:4, forenseQuien:'Roig, el médico de a bordo,', forenseAlt:'Un médico que subió en Domodossola',
+ horas:['la cena','la sobremesa','el paso del túnel','la parada de Domodossola','el amanecer'],
+ horaCrimen:'el paso del túnel',
+ victima:{n:'don Leandro Vega de Aramburu',r:'financiero, dueño del coche privado',g:'m'},
+ escena:['Tres coches enganchados a un expreso que cruza los Alpes de noche, con los topes cerrados desde la cena y nieve en las vías. Seis pasajeros y nadie más.',
+  'El túnel de Ricken dura cuatro minutos. Cuando volvió la luz, don Leandro Vega de Aramburu seguía sentado a la mesa, y ya no respiraba.',
+  'A ochenta por hora nadie sube ni baja. Uno de los seis lo mató. Y ninguno de los demás estaba donde dice: en esos cuatro minutos de oscuridad, cada cual se movió por lo suyo.',
+  'Tienes hasta Domodossola.'],
+ rooms:[
+  {n:'Furgón',     d:'el vagón de equipajes',           mat:'carbonilla',      a:'almacen',    art:'el '},
+  {n:'Plataforma', d:'la plataforma del último coche',  mat:'carbonilla',      a:'entrada',    art:'la '},
+  {n:'Pasillo',    d:'el corredor de las cabinas',      mat:'moqueta roja',    a:'pasillo',    art:'el '},
+  {n:'Cabina',     d:'la cabina del difunto',           mat:'moqueta roja',    a:'cama',       art:'la '},
+  {n:'Cocina',     d:'la cocina del coche restaurante', mat:'grasa de fogón',  a:'cocina',     art:'la '},
+  {n:'Restaurante',d:'el coche comedor',                mat:'grasa de fogón',  a:'mesa',       art:'el '},
+  {n:'Salón',      d:'el coche bar y sus butacas',      mat:'ceniza de puro',  a:'salon',      art:'el '},
+  {n:'Fumador',    d:'el reservado de fumar',           mat:'ceniza de puro',  a:'butacas',    art:'el '},
+  {n:'Tocador',    d:'el aseo del coche cama',          mat:'talco derramado', a:'tocador',    art:'el '}
+ ],
+ chars:[
+  {n:'Matilde Vega',  r:'hija del difunto',            ini:'M',obj:'un guante largo de cabritilla'},
+  {n:'Óscar Brandt',  r:'su socio en Zúrich',          ini:'B',obj:'un billetero con el forro descosido'},
+  {n:'Aurora Sanchís',r:'cantante de zarzuela',        ini:'A',obj:'una polvera de nácar'},
+  {n:'Nicolás Prats', r:'secretario del difunto',      ini:'P',obj:'una pluma sin capuchón'},
+  {n:'Emilio Roig',   r:'médico de a bordo',           ini:'R',obj:'un termómetro en su estuche'},
+  {n:'Anselmo Gil',   r:'jefe de tren',                ini:'G',obj:'un silbato de latón'}
+ ],
+ means:[
+  {n:'una navaja de afeitar',      t:'hoja'},
+  {n:'el cortapuros de plata',     t:'hoja'},
+  {n:'una barra de la cortina',    t:'golpe'},
+  {n:'la botella de champán',      t:'golpe'},
+  {n:'veronal en la copa',         t:'veneno'},
+  {n:'cianuro en el café',         t:'veneno'}
+ ],
+ tagTxt:{hoja:'una hoja fina, de las que se afilan a diario',golpe:'un golpe seco con algo pesado y alargado',veneno:'un veneno tomado por la boca'},
+ descarte:[
+  'sigue en su estuche del furgón, con el precinto sin tocar',
+  'no ha salido del armario del jefe de tren, que cierra con llave',
+  'no presenta sangre ni marca de uso',
+  'anduvo toda la noche en manos del camarero del restaurante',
+  'quedó bajo llave en la caja del coche cama'
+ ],
+ secretos:[
+  'viajaba con pasaporte y nombre prestados',
+  'llevaba meses vaciando las cuentas del difunto',
+  'mantenía con él una relación que arruinaría a dos familias',
+  'transportaba en el equipaje algo que no declaró en la frontera',
+  'debía en Montecarlo un dinero que no era suyo',
+  'iba a declarar contra él ante un juez de Ginebra',
+  'escondía en su cabina a un pasajero sin billete'
+ ],
+ confesion:['Yo no lo maté. Pero en esos cuatro minutos no estaba donde he dicho, y explicarlo me hunde igual.',
+            'Mentí, sí. Por un asunto mío que no tiene nada que ver con su muerte.',
+            'Está bien: no estuve donde dije. Y sigo sin haber matado a nadie.'],
+ negacion:['Eso no prueba nada, y usted lo sabe.',
+           'Esa cosa pudo quedarse ahí de mil maneras. Busca usted mal.',
+           'Insista cuanto quiera. A quien se le acaba la noche es a usted.']
+},
+
+antartida:{
+ id:'antartida', nombre:'Base antártica', epigrafe:'Invernada de 1958 · Base Covadonga',
+ lugar:'la base', corto:'BASE COVADONGA', cuerpo:'el cuerpo',
+ forenseIdx:4, forenseQuien:'Aguirre, la médica de la expedición,', forenseAlt:'El médico del buque, por radio',
+ horas:['el relevo de la tarde','la cena','la guardia larga','la segunda guardia','el desayuno'],
+ horaCrimen:'la guardia larga',
+ victima:{n:'el comandante Elías Beltrán',r:'jefe de la base',g:'m'},
+ escena:['Cuatro meses de noche seguida, cincuenta bajo cero y el buque de relevo a nueve semanas. Seis personas encerradas en una base que se recorre entera en dos minutos.',
+  'En la guardia larga, alguien apagó la radio. Cuando volvieron a encenderla, el comandante Beltrán llevaba rato muerto.',
+  'De fuera no entró nadie: fuera no hay nadie en mil kilómetros. Uno de los seis lo mató. Los demás tampoco estaban en su puesto, y en una invernada cada cual guarda algo que no aguanta cuatro meses de convivencia.',
+  'Tienes hasta el desayuno.'],
+ rooms:[
+  {n:'Radio',      d:'los equipos y el libro de partes',  mat:'grasa de motor',  a:'radio',      art:'la '},
+  {n:'Generador',  d:'los motores y el combustible',      mat:'grasa de motor',  a:'generador',  art:'el '},
+  {n:'Cocina',     d:'los fogones y la despensa',         mat:'harina',          a:'cocina',     art:'la '},
+  {n:'Comedor',    d:'la mesa común',                     mat:'harina',          a:'mesa',       art:'el '},
+  {n:'Dormitorio', d:'las literas y los sacos',           mat:'pelusa de manta', a:'literas',    art:'el '},
+  {n:'Enfermería', d:'la camilla y el botiquín',          mat:'pelusa de manta', a:'enfermeria', art:'la '},
+  {n:'Laboratorio',d:'las muestras de hielo',             mat:'sal de deshielo', a:'laboratorio',art:'el '},
+  {n:'Almacén',    d:'las cajas y los trineos',           mat:'sal de deshielo', a:'almacen',    art:'el '},
+  {n:'Túnel',      d:'el pasadizo excavado en la nieve',  mat:'hielo picado',    a:'tunel',      art:'el '}
+ ],
+ chars:[
+  {n:'Irene Sáez',     r:'meteoróloga',              ini:'S',obj:'un lápiz de grafito mordisqueado'},
+  {n:'Tomás Calvo',    r:'mecánico y electricista',  ini:'C',obj:'una llave de tubo pequeña'},
+  {n:'Wenceslao Ruiz', r:'cocinero',                 ini:'W',obj:'un abrelatas con el mango astillado'},
+  {n:'Bruno Ferrán',   r:'geólogo',                  ini:'F',obj:'una lupa de campo rayada'},
+  {n:'Nieves Aguirre', r:'médica de la expedición',  ini:'A',obj:'un frasco de yodo medio vacío'},
+  {n:'Paco Miralles',  r:'radiotelegrafista',        ini:'M',obj:'unos auriculares con un casquillo suelto'}
+ ],
+ means:[
+  {n:'un cuchillo de cocina',      t:'hoja'},
+  {n:'el punzón de picar hielo',   t:'hoja'},
+  {n:'una llave inglesa grande',   t:'golpe'},
+  {n:'la barra de atizar la estufa',t:'golpe'},
+  {n:'anticongelante en el café',  t:'veneno'},
+  {n:'un frasco entero de somníferos', t:'veneno'}
+ ],
+ tagTxt:{hoja:'una hoja corta y bien afilada',golpe:'un golpe seco con algo pesado y de hierro',veneno:'un tóxico que entró por la boca'},
+ descarte:[
+  'sigue en su gancho del almacén, bajo una escarcha que nadie ha tocado',
+  'no ha salido de la caja del último aprovisionamiento, que nadie ha abierto',
+  'no presenta sangre ni señal de uso',
+  'anduvo toda la noche en manos del cocinero',
+  'quedó bajo llave en el armario del comandante'
+ ],
+ secretos:[
+  'llevaba semanas falseando los partes que se mandaban a la península',
+  'se estaba bebiendo el alcohol de la enfermería',
+  'mantenía una relación que en una base de seis personas no cabe',
+  'estropeó la radio a propósito para retrasar el relevo',
+  'sabía que la expedición anterior dejó algo enterrado en el hielo',
+  'escribía un diario con todo lo que nadie quería que se supiera',
+  'falsificó su hoja de servicios para entrar en la expedición'
+ ],
+ confesion:['Yo no lo maté. Pero no estaba en mi puesto, y aquí dentro eso se paga durante cuatro meses.',
+            'Mentí. Por algo mío, que no tiene nada que ver con el comandante.',
+            'Está bien: no estuve donde dije. Y sigo sin haber matado a nadie.'],
+ negacion:['Eso no prueba nada, y aquí todos tocamos todo.',
+           'Esa cosa lleva semanas rodando por la base. Buscas mal.',
+           'Sigue insistiendo. A quien se le acaba la noche es a ti.']
+},
+
+orbital:{
+ id:'orbital', nombre:'Estación orbital', epigrafe:'Órbita baja, 2091 · estación Arrecife',
+ lugar:'la estación', corto:'EST. ARRECIFE', cuerpo:'el cuerpo',
+ forenseIdx:4, forenseQuien:'Serra, el médico de a bordo,', forenseAlt:'El forense del centro de control, por enlace',
+ horas:['el turno de día','la cena','el turno de sueño','la ventana de enlace','el relevo'],
+ horaCrimen:'el turno de sueño',
+ victima:{n:'la comandante Irina Solé',r:'al mando de la estación',g:'f'},
+ escena:['Una estación de seis plazas en órbita baja, con las esclusas selladas desde el turno de día y la siguiente nave a once semanas. Seis personas y ningún sitio adonde ir.',
+  'En el turno de sueño alguien cortó el registro de puertas durante cuarenta minutos. Cuando volvió, la comandante Solé flotaba sin constantes en el Puente.',
+  'De fuera no entró nadie: fuera es el vacío. Uno de los seis la mató. Y ninguno de los demás estaba en su litera, porque cada cual tenía algo que hacer sin que quedara registrado.',
+  'Tienes hasta el relevo.'],
+ rooms:[
+  {n:'Puente',     d:'la consola de mando',             mat:'polvo de fibra',      a:'consola',    art:'el '},
+  {n:'Esclusa',    d:'la salida al vacío',              mat:'polvo de fibra',      a:'esclusa',    art:'la '},
+  {n:'Laboratorio',d:'los experimentos en curso',       mat:'residuo reactivo',    a:'laboratorio',art:'el '},
+  {n:'Invernadero',d:'el cultivo hidropónico',          mat:'residuo reactivo',    a:'invernadero',art:'el '},
+  {n:'Comedor',    d:'la mesa y las raciones',          mat:'migas de ración',     a:'mesa',       art:'el '},
+  {n:'Cambusa',    d:'la despensa de a bordo',          mat:'migas de ración',     a:'cocina',     art:'la '},
+  {n:'Literas',    d:'los sacos de dormir anclados',    mat:'pelusa de filtro',    a:'literas',    art:'las '},
+  {n:'Enfermería', d:'la camilla y el autodiagnóstico', mat:'pelusa de filtro',    a:'enfermeria', art:'la '},
+  {n:'Motores',    d:'la sala de máquinas',             mat:'grasa de sellado',    a:'taller',     art:'los '}
+ ],
+ chars:[
+  {n:'Diego Arriaga', r:'ingeniero de sistemas',     ini:'A',obj:'una tarjeta de acceso rayada'},
+  {n:'Yuki Moreno',   r:'bióloga',                   ini:'M',obj:'un guante de laboratorio del revés'},
+  {n:'Sergio Lahoz',  r:'piloto',                    ini:'L',obj:'un reloj de muñeca parado'},
+  {n:'Nadia Brum',    r:'especialista de carga',     ini:'B',obj:'un mosquetón sin seguro'},
+  {n:'Iván Serra',    r:'médico de a bordo',         ini:'S',obj:'una ampolla de sedante vacía'},
+  {n:'Hugo Requena',  r:'técnico de soporte vital',  ini:'R',obj:'un filtro de repuesto sin precinto'}
+ ],
+ means:[
+  {n:'un bisturí del botiquín',     t:'hoja'},
+  {n:'una cuchilla de corte',       t:'hoja'},
+  {n:'una llave dinamométrica',     t:'golpe'},
+  {n:'un extintor de mano',         t:'golpe'},
+  {n:'sedante en dosis triple',     t:'veneno'},
+  {n:'la mezcla de aire alterada',  t:'veneno'}
+ ],
+ tagTxt:{hoja:'una hoja corta y quirúrgica',golpe:'un golpe con algo pesado, aprovechando que allí nada pesa',veneno:'un tóxico que entró por la vena o por el aire'},
+ descarte:[
+  'sigue en su anclaje, con el sello magnético sin abrir',
+  'no ha salido del contenedor que solo abre el código de mando',
+  'no presenta sangre ni señal de uso',
+  'anduvo todo el turno en manos del técnico de soporte',
+  'figura en el inventario de a bordo, en su sitio y sin tocar'
+ ],
+ secretos:[
+  'vendía datos de los experimentos a una empresa de tierra',
+  'desactivó un sensor para que no quedaran registrados sus turnos',
+  'sabía que el fallo del filtro de aire fue culpa suya',
+  'mantenía una relación que el reglamento de a bordo prohíbe',
+  'guardaba una copia del informe que iba a hundir la misión',
+  'llevaba meses sin declarar un cargamento en la bodega',
+  'pensaba quedarse a bordo cuando llegara el relevo'
+ ],
+ confesion:['Yo no la maté. Pero no estaba en mi litera, y si digo dónde estaba me bajan en el primer relevo.',
+            'Mentí. Por un asunto mío, que no tiene nada que ver con su muerte.',
+            'Está bien: no estuve donde dije. Y sigo sin haber matado a nadie.'],
+ negacion:['Eso no prueba nada. Aquí todos pasamos por todas partes.',
+           'Esa cosa lleva semanas flotando por los módulos. Buscas mal.',
+           'Sigue insistiendo. A quien se le acaba el turno es a ti.']
+}
+};
+
+const DIFS={
+ facil :{id:'facil', n:'Indicios claros', acc:16, liars:2, desc:'2 mienten · 16 acciones'},
+ normal:{id:'normal',n:'Noche cerrada',  acc:15, liars:3, desc:'3 mienten · 15 acciones'},
+ dificil:{id:'dificil',n:'Sin testigos',  acc:14, liars:4, desc:'4 mienten · 14 acciones'}
+};
+
+/* ============================================================
+   GENERADOR
+   ============================================================ */
+let CID=0;
+function mk(txt,src,facts,extra){return Object.assign({id:++CID,txt,src,facts:facts||[]},extra||{})}
+
+function build(P,dif,r){
+  const nine=[0,1,2,3,4,5,6,7,8];
+  const culprit=Math.floor(r()*6);
+  const crimeRoom=Math.floor(r()*9);
+  const crimeMeans=Math.floor(r()*6);
+  const moved=r()<0.7;
+  const bodyRoom=moved?pick(neighbors(crimeRoom),r):crimeRoom;
+
+  const others=shuffle([0,1,2,3,4,5].filter(i=>i!==culprit),r);
+  const liars=[culprit,...others.slice(0,dif.liars-1)];
+  const truthful=others.slice(dif.liars-1);
+
+  const trueRoom={}; trueRoom[culprit]=crimeRoom;
+  const busy=new Set([crimeRoom]);
+  const freeRoom=()=>{const f=nine.filter(x=>x!==crimeRoom&&!busy.has(x));if(!f.length)return null;
+    const x=pick(f,r);busy.add(x);return x};
+
+  for(const c of liars){ if(c===culprit)continue; const x=freeRoom(); if(x===null)return null; trueRoom[c]=x }
+
+  /* los sinceros se agrupan y se confirman entre ellos */
+  const groups=[];{const t=truthful.slice();
+    while(t.length){ groups.push(t.splice(0, t.length===3?3:2)) }}
+  for(const g of groups){ const x=freeRoom(); if(x===null)return null; g.forEach(c=>trueRoom[c]=x) }
+
+  /* Lo que cada uno DICE. La coartada falsa apunta siempre a una sala que
+     nadie ocupó: si señalase la sala de otro, ese otro la desmentiría gratis. */
+  const claim={};
+  const ocupadas=new Set(Object.values(trueRoom));
+  const libres=shuffle(nine.filter(x=>!ocupadas.has(x)),r);
+  let li=0;
+  for(const c of liars){
+    if(li<libres.length){ claim[c]=libres[li++]; }
+    else { let x,k=0; do{x=Math.floor(r()*9);k++}while((x===trueRoom[c]||x===crimeRoom)&&k<50); claim[c]=x }
+  }
+  for(const g of groups) g.forEach(c=>claim[c]=trueRoom[c]);
+
+  /* ---------- pistas ---------- */
+  const clues=[];
+  const Rm=P.rooms, Ch=P.chars, Ms=P.means;
+  const srcR=i=>({t:'room',i}), srcC=i=>({t:'char',i});
+
+  /* la escena */
+  if(moved){
+    clues.push(mk(`${P.cuerpo[0].toUpperCase()+P.cuerpo.slice(1)} fue arrastrado hasta aquí. Hay un reguero tenue que entra por la puerta: lo mataron en otra parte.`,
+      srcR(bodyRoom),[{k:'roomNear',v:bodyRoom},{k:'roomNot',v:bodyRoom}],{hard:true}));
+    clues.push(mk(`En las suelas del muerto, ${Rm[crimeRoom].mat}. Vino andando de un sitio con ese suelo — o lo trajeron desde él.`,
+      srcR(bodyRoom),[{k:'roomMat',v:Rm[crimeRoom].mat}],{hard:true}));
+  }else{
+    clues.push(mk(`Aquí hay señales de lucha: una silla volcada, la alfombra corrida, sangre bajo ella. No lo movieron. Murió en esta sala.`,
+      srcR(bodyRoom),[{k:'roomIs',v:crimeRoom}],{hard:true}));
+  }
+  const fq=culprit===P.forenseIdx?P.forenseAlt:P.forenseQuien;
+  clues.push(mk(`${fq[0].toUpperCase()+fq.slice(1)} examina la herida: fue ${P.tagTxt[Ms[crimeMeans].t]}.`,
+    srcR(bodyRoom),[{k:'meansTag',v:Ms[crimeMeans].t}],{hard:true}));
+
+  /* descartes de medio — el hermano de tag es obligatorio */
+  const sameTag=Ms.map((m,i)=>i).filter(i=>Ms[i].t===Ms[crimeMeans].t&&i!==crimeMeans);
+  const dsh=shuffle(P.descarte,r);
+  const freeRooms=shuffle(nine.filter(x=>x!==bodyRoom),r);
+  let fr=0;
+  sameTag.forEach((mi,k)=>{
+    clues.push(mk(`${Ms[mi].n[0].toUpperCase()+Ms[mi].n.slice(1)} ${dsh[k%dsh.length]}. Queda fuera.`,
+      srcR(freeRooms[fr++%freeRooms.length]),[{k:'meansNot',v:mi}],{hard:true}));
+  });
+  /* uno o dos descartes de otro tag, por textura */
+  const extraElim=shuffle(Ms.map((m,i)=>i).filter(i=>Ms[i].t!==Ms[crimeMeans].t),r).slice(0,dif.id==='facil'?2:1);
+  extraElim.forEach((mi,k)=>{
+    clues.push(mk(`${Ms[mi].n[0].toUpperCase()+Ms[mi].n.slice(1)} ${dsh[(k+3)%dsh.length]}.`,
+      srcC(pick(liars.concat(truthful),r)),[{k:'meansNot',v:mi}]));
+  });
+
+  /* la sala del crimen, cuando no es donde apareció el cuerpo, está demasiado limpia */
+  if(moved){
+    clues.push(mk(`Esta sala está demasiado limpia. Alguien borró aquí lo que hubiera, y con prisa: queda un cerco húmedo junto al zócalo y ni una sola huella en el polvo.`,
+      srcR(crimeRoom),[{k:'roomIs',v:crimeRoom}],{hard:true}));
+  }
+
+  /* objetos personales. Redacción idéntica para todos: distinguir cuál acusa
+     y cuál es señuelo es trabajo del jugador, no del formato del texto.
+     El culpable no deja ninguno — a él se llega por eliminación. */
+  const dejan=liars.filter(c=>c!==culprit);
+  for(const c of dejan){
+    clues.push(mk(`Tras un mueble, en el suelo, ${Ch[c].obj}. Es de ${Ch[c].n}.`,
+      srcR(trueRoom[c]),[],{obj:c,objRoom:trueRoom[c]}));
+  }
+  for(const g of groups) for(const c of g){
+    let x,k=0; do{x=Math.floor(r()*9);k++}while((x===trueRoom[c])&&k<30);
+    clues.push(mk(`Tras un mueble, en el suelo, ${Ch[c].obj}. Es de ${Ch[c].n}.`, srcR(x),[],{obj:c,objRoom:x}));
+  }
+
+  /* coartadas mutuas de los sinceros */
+  for(const g of groups){
+    const nombres=g.map(c=>Ch[c].n);
+    const factos=g.map(c=>({k:'atRoom',c,r:trueRoom[c]}));
+    const txt=`Durante ${P.horaCrimen} estuvimos juntos en ${SALA(P,trueRoom[g[0]])}: ${nombres.join(' y ')}. No se movió nadie de allí, y cada cual responde por los demás.`;
+    g.forEach(c=>clues.push(mk(txt,srcC(c),factos,{hard:true,alibi:true})));
+  }
+
+  /* secretos */
+  const sec=shuffle(P.secretos,r);
+  const secreto={}; liars.forEach((c,i)=>secreto[c]=sec[i%sec.length]);
+
+  const C={P,dif,culprit,crimeRoom,crimeMeans,bodyRoom,moved,liars,truthful,groups,
+           trueRoom,claim,clues,secreto,
+           /* solo los mentirosos que NO son el culpable pueden quebrarse:
+              al culpable se llega descartando a los otros cinco */
+           careoFacts:dejan.map(c=>({k:'atRoom',c,r:trueRoom[c]}))};
+  return C;
+}
+
+function ok(h,facts,P){
+  for(const f of facts){
+    if(f.k==='meansTag'&&P.means[h.m].t!==f.v)return false;
+    if(f.k==='meansNot'&&h.m===f.v)return false;
+    if(f.k==='roomIs'&&h.r!==f.v)return false;
+    if(f.k==='roomNot'&&h.r===f.v)return false;
+    if(f.k==='roomMat'&&P.rooms[h.r].mat!==f.v)return false;
+    if(f.k==='roomNear'&&!(h.r===f.v||neighbors(f.v).includes(h.r)))return false;
+    if(f.k==='atRoom'&&h.c===f.c&&h.r!==f.r)return false;
+  }
+  return true;
+}
+
+function solutions(C,facts){
+  const out=[];
+  for(let c=0;c<6;c++)for(let rr=0;rr<9;rr++)for(let m=0;m<6;m++){
+    const h={c,r:rr,m}; if(ok(h,facts,C.P))out.push(h);
+  }
+  return out;
+}
+
+/* el caso solo es válido si TODO lo descubrible deja una única lectura */
+function verify(C){
+  const facts=C.clues.flatMap(x=>x.facts).concat(C.careoFacts);
+  const s=solutions(C,facts);
+  return s.length===1&&s[0].c===C.culprit&&s[0].r===C.crimeRoom&&s[0].m===C.crimeMeans;
+}
+
+function generateCase(packId,difId,seedStr){
+  const P=PACKS[packId],dif=DIFS[difId];
+  for(let a=0;a<400;a++){
+    const r=mulberry32(hash(seedStr+'|'+packId+'|'+difId)+a*7919);
+    const C=build(P,dif,r);
+    if(C&&verify(C))return C;
+  }
+  return null;
+}
+
+/* ============================================================
+   FOTOS — láminas de ambiente y tableros, en assets/. Cada tablero
+   es una retícula de 3x3 en una sola imagen: el plano la trocea con
+   background-position, una novena parte por sala.
+   El build de un solo archivo sustituye estas rutas por los datos.
+   ============================================================ */
+const FOTO={
+  amb:{villa:'assets/amb-villa.webp', casa:'assets/amb-casa.webp', monasterio:'assets/amb-monasterio.webp', cuartel:'assets/amb-cuartel.webp', cortijo:'assets/amb-cortijo.webp', tren:'assets/amb-tren.webp', antartida:'assets/amb-antartida.webp', orbital:'assets/amb-orbital.webp'},
+  tab:{villa:'assets/tab-villa.webp', casa:'assets/tab-casa.webp', monasterio:'assets/tab-monasterio.webp', cuartel:'assets/tab-cuartel.webp', cortijo:'assets/tab-cortijo.webp', tren:'assets/tab-tren.webp', antartida:'assets/tab-antartida.webp', orbital:'assets/tab-orbital.webp'}
+};
+
+/* catálogo: los dos primeros tienen motor; el resto son el plan */
+const CAT=[
+ {id:'villa',     n:'Villa romana',      s:'Roma, 61 d.C.',        ok:1},
+ {id:'casa',      n:'Mansión Quintanar', s:'Santander, 1928',      ok:1},
+ {id:'monasterio',n:'Monasterio',        s:'Castilla, 1327',       ok:1},
+ {id:'cuartel',   n:'Cuartel en guerra', s:'Normandía, 1944',      ok:1},
+ {id:'cortijo',   n:'Cortijo andaluz',   s:'Jaén, 1931',           ok:1},
+ {id:'tren',      n:'Tren nocturno',     s:'Los Alpes, 1931', ok:1},
+ {id:'antartida', n:'Base antártica',    s:'Invernada, 1958', ok:1},
+ {id:'orbital',   n:'Estación orbital',  s:'Órbita baja, 2091', ok:1}
+];
+
+/* ============================================================
+   EXPEDIENTE DEL SOCIO — persiste entre sesiones
+   ============================================================ */
+const KEY='huntclub.v1';
+let ST={log:[],meds:{}};
+try{const raw=localStorage.getItem(KEY); if(raw)ST=Object.assign(ST,JSON.parse(raw))}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
+
+const RANKS=[
+ {min:0, n:'Aspirante',        d:'Nadie del Club te conoce todavía.'},
+ {min:1, n:'Socio',            d:'Un caso resuelto. Ya te dejan pasar al salón.'},
+ {min:3, n:'Investigador',     d:'Tu nombre empieza a sonar en las reuniones.'},
+ {min:6, n:'Sabueso',          d:'Te guardan los casos que nadie quiere.'},
+ {min:10,n:'Maestro',          d:'Pocos llegan aquí dentro. Muy pocos.'},
+ {min:16,n:'Miembro vitalicio',d:'Tu retrato cuelga en la escalera.'}
+];
+const MEDS=[
+ {id:'first', i:'✦',n:'Primer caso',   d:'Resuelve tu primer caso'},
+ {id:'hard',  i:'◐',n:'Sin testigos',  d:'Gana en la dificultad más alta'},
+ {id:'clean', i:'◈',n:'Mano limpia',   d:'Gana sin fallar un solo careo'},
+ {id:'fast',  i:'◷',n:'Antes del alba',d:'Gana con 5 acciones o más de sobra'},
+ {id:'both',  i:'❖',n:'Dos mundos',    d:'Resuelve un caso en cada ambiente'},
+ {id:'racha', i:'•••',n:'Racha de tres', d:'Tres casos seguidos resueltos'},
+ {id:'ocho',  i:'◉',n:'La colección',  d:'Resuelve un caso en los ocho ambientes'}
+];
+const wins=()=>ST.log.filter(x=>x.win).length;
+const rank=()=>{const w=wins();let r=RANKS[0];RANKS.forEach(x=>{if(w>=x.min)r=x});return r};
+const nextRank=()=>RANKS.find(x=>x.min>wins());
+
+function logCase(res){            /* 'win' | 'lose' | 'ab' */
+  const win=res==='win';
+  const e={t:Date.now(),seed:S.seed,pack:S.pack,dif:S.dif.id,win,ab:res==='ab',left:S.acc,fails:S.careoFails||0,mesa:S.modo==='mesa'?S.n:0};
+  ST.log.unshift(e); ST.log=ST.log.slice(0,80);
+  const W=ST.log.filter(x=>x.win);
+  const got=id=>{if(!ST.meds[id])ST.meds[id]=Date.now()};
+  if(win){
+    got('first');
+    if(e.dif==='dificil')got('hard');
+    if(e.fails===0)got('clean');
+    if(e.left>=5)got('fast');
+    if(W.some(x=>x.pack==='villa')&&W.some(x=>x.pack==='casa'))got('both');
+    if(ST.log.length>=3&&ST.log.slice(0,3).every(x=>x.win))got('racha');
+    if(CAT.filter(c=>c.ok).every(c=>W.some(x=>x.pack===c.id)))got('ocho');
+  }
+  save();
+}
+
+/* ============================================================
+   MODO MESA — todos con el mismo código, cada uno con su número.
+   Lo que hay en cada sala se reparte entre los jugadores de forma
+   calculada, no transmitida: los seis móviles llegan por su cuenta
+   al mismo reparto. Nadie puede cerrar el caso solo; la mesa sí.
+   Lo que hay junto al cuerpo lo ve todo el mundo: es el punto de
+   partida común.
+   ============================================================ */
+const cuantosVen=n=>Math.max(1,Math.round(n/2));
+
+/* los hechos que un jugador puede llegar a reunir él solo: lo que ve en las salas
+   más los careos que puede romper con las pruebas que le han tocado */
+function hechosDe(C,map,yo){
+  const f=[],rotos=new Set();
+  C.clues.forEach(c=>{
+    if(c.src.t==='room'&&map[c.id]&&!map[c.id].includes(yo))return;
+    f.push(...c.facts);
+    if(c.obj!=null&&c.obj!==C.culprit&&C.liars.includes(c.obj)&&c.objRoom===C.trueRoom[c.obj])rotos.add(c.obj);
+  });
+  rotos.forEach(c=>f.push({k:'atRoom',c,r:C.trueRoom[c]}));
+  return f;
+}
+function repartoCrudo(C,seed,n,ven,intento){
+  const map={};
+  C.clues.forEach(c=>{
+    if(c.src.t!=='room'||c.src.i===C.bodyRoom){map[c.id]=null;return}
+    const r=mulberry32(hash(seed+'|reparto|'+c.id+'|'+n+'|'+intento));
+    map[c.id]=shuffle([...Array(n).keys()].map(i=>i+1),r).slice(0,ven);
+  });
+  return map;
+}
+/* Un reparto solo vale si NADIE puede cerrar el caso por su cuenta — si no,
+   el que tenga suerte gana callado y se acabó el juego — y si nadie se queda
+   sin nada que aportar. Se prueban repartos hasta dar con uno que cumpla:
+   como todo sale de la semilla, los ocho móviles eligen el mismo. */
+function repartoVale(C,map,n){
+  for(let yo=1;yo<=n;yo++){
+    const propias=C.clues.filter(c=>c.src.t==='room'&&c.src.i!==C.bodyRoom&&map[c.id].includes(yo)).length;
+    if(!propias)return false;
+    if(solutions(C,hechosDe(C,map,yo)).length===1)return false;
+  }
+  return true;
+}
+function reparto(C,seed,n){
+  const nc=C.clues.filter(c=>c.src.t==='room'&&c.src.i!==C.bodyRoom).length;
+  /* cuántos ojos por pista: menos y alguien se queda sin nada; más y alguien resuelve solo.
+     Se prueba el reparto ideal y se va abriendo a los dos lados. */
+  const ideal=cuantosVen(n), suelo=Math.max(1,Math.ceil(n/Math.max(1,nc)));
+  const orden=[];
+  for(let d=0;d<n;d++){
+    const a=ideal-d,b=ideal+d;
+    if(a>=suelo&&a<n&&!orden.includes(a))orden.push(a);
+    if(d&&b>=suelo&&b<n&&!orden.includes(b))orden.push(b);
+  }
+  if(!orden.length)orden.push(Math.min(Math.max(suelo,1),Math.max(1,n-1)));
+  let mejor=null,mejorMal=1e9;
+  for(const ven of orden)for(let a=0;a<25;a++){
+    const map=repartoCrudo(C,seed,n,ven,a);
+    if(repartoVale(C,map,n))return map;
+    const mal=fallosReparto(C,map,n);
+    if(mal<mejorMal){mejorMal=mal;mejor=map}
+  }
+  /* ninguno limpio: se coge el menos malo y se repara a mano */
+  return repara(C,mejor||repartoCrudo(C,seed,n,1,999),n,seed);
+}
+/* Reparación dirigida: al que pueda cerrar el caso solo se le quita una pista con
+   sustancia y se le pasa a otro; al que se quede sin nada se le da una. */
+function repara(C,map,n,seed){
+  const r=mulberry32(hash(seed+'|repara|'+n));
+  const jug=[...Array(n).keys()].map(i=>i+1);
+  const sueltas=C.clues.filter(c=>c.src.t==='room'&&c.src.i!==C.bodyRoom);
+  const pega=(arr)=>arr[Math.floor(r()*arr.length)];
+  for(let paso=0;paso<60;paso++){
+    const solo=jug.find(yo=>solutions(C,hechosDe(C,map,yo)).length===1);
+    if(solo===undefined)break;
+    const cand=sueltas.filter(c=>map[c.id].includes(solo)&&(c.facts.length||c.obj!=null)&&map[c.id].length>1);
+    const cand2=cand.length?cand:sueltas.filter(c=>map[c.id].includes(solo)&&(c.facts.length||c.obj!=null));
+    if(!cand2.length)break;
+    const c=pega(cand2), otros=jug.filter(x=>!map[c.id].includes(x));
+    if(!otros.length)break;
+    map[c.id]=map[c.id].filter(x=>x!==solo);
+    if(!map[c.id].includes(otros[0]))map[c.id].push(pega(otros));
+  }
+  for(let paso=0;paso<30;paso++){
+    const vacio=jug.find(yo=>!sueltas.some(c=>map[c.id].includes(yo)));
+    if(vacio===undefined)break;
+    const cand=sueltas.filter(c=>!map[c.id].includes(vacio));
+    if(!cand.length)break;
+    const c=pega(cand); map[c.id]=map[c.id].concat(vacio);
+    if(solutions(C,hechosDe(C,map,vacio)).length===1)map[c.id]=map[c.id].filter(x=>x!==vacio);
+  }
+  return map;
+}
+/* cuenta cuántos jugadores rompen las dos condiciones, para quedarse con el menos malo */
+function fallosReparto(C,map,n){
+  let mal=0;
+  for(let yo=1;yo<=n;yo++){
+    const propias=C.clues.filter(c=>c.src.t==='room'&&c.src.i!==C.bodyRoom&&map[c.id].includes(yo)).length;
+    if(!propias)mal+=2;                                             /* sin nada que aportar: lo peor */
+    if(solutions(C,hechosDe(C,map,yo)).length===1)mal+=3;           /* puede ganar sin hablar: aún peor */
+  }
+  return mal;
+}
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+let S=null, TAB='jugar', sel={c:null,r:null,m:null};
+let setup={pack:'villa',dif:'normal',seed:'',modo:'solo',n:4,yo:1};
+const $=id=>document.getElementById(id);
+const screen=$('screen'),nav=$('nav'),modal=$('modal'),sheet=$('sheet');
+const enCaso=()=>S&&!S.over;
+
+function randSeed(){const A='BCDFGHJKLMNPRSTVXZ',V='AEIOU';let s='';
+  for(let i=0;i<6;i++)s+=(i%2?V:A)[Math.floor(Math.random()*(i%2?V.length:A.length))];return s}
+
+/* ¿esta pista es mía? en solitario, todas */
+const mia=c=>S.modo!=='mesa'||!S.rep[c.id]||S.rep[c.id].includes(S.yo);
+
+function newGame(packId,difId,seed,modo,n,yo){
+  const C=generateCase(packId,difId,seed);
+  if(!C){sheetMsg('CÓDIGO ESTÉRIL','Ese código no cuaja en un caso resoluble. Prueba con otro.');return}
+  modo=modo||'solo';
+  S={C,seed,pack:packId,dif:DIFS[difId],acc:DIFS[difId].acc,rooms:new Set(),chars:new Set(),
+     careo:{},careoFails:0,found:new Set(),tab:'plano',over:null,seenClues:0,
+     modo,n:n||1,yo:yo||1,notas:[],fuera:false,rep:{}};
+  if(modo==='mesa')S.rep=reparto(C,seed,S.n);
+  document.body.dataset.pack=packId; TAB='jugar';
+  render(); escena();
+}
+function escena(){
+  const P=S.C.P; let i=S.modo==='mesa'?-1:0;
+  const paso=()=>{
+    if(i===-1){
+      openSheetRaw('JUGADOR '+S.yo+' DE '+S.n,
+       `<p style="font-family:var(--serif);font-size:19px;line-height:1.55">Sois <b>${S.n}</b> sobre el mismo caso. En cada sala solo verás <b>una parte</b> de lo que hay: el resto lo encontrarán los demás.</p>
+        <p style="font-family:var(--serif);font-size:19px;line-height:1.55;margin-top:12px;color:var(--dim)">Lo que está junto al cuerpo lo veis todos. Lo demás hay que pedirlo — o cambiarlo, o inventarlo.</p>
+        <button class="btn primary" id="nx">ENTENDIDO</button>`);
+      $('nx').onclick=()=>{i=0;paso()}; return;
+    }
+    if(i>=P.escena.length){closeSheet();render();return}
+    const ult=i===P.escena.length-1;
+    openSheetRaw(i===0?P.corto:'',
+      `<p style="font-family:var(--serif);font-size:20px;line-height:1.55">${P.escena[i]}</p>
+       <button class="btn ${ult?'primary':''}" id="nx">${ult?'EMPEZAR':'···'}</button>`);
+    $('nx').onclick=()=>{i++;paso()};
+  };
+  paso();
+}
+function spend(n){S.acc=Math.max(0,S.acc-n)}
+const facts=()=>{const f=[];
+  S.C.clues.forEach(c=>{if(S.found.has(c.id))f.push(...c.facts)});
+  Object.keys(S.careo).forEach(c=>{if(S.careo[c]==='ok')f.push({k:'atRoom',c:+c,r:S.C.trueRoom[c]})});
+  /* lo que te han contado cuenta igual que lo que has visto — y la app no lo comprueba */
+  (S.notas||[]).forEach(nt=>{if(nt.fio)f.push(nt.hecho)});
+  return f};
+const foundClues=()=>S.C.clues.filter(c=>S.found.has(c.id));
+
+/* ============================================================
+   ARMAZÓN
+   ============================================================ */
+const IC={
+ archivo:'<path d="M3 7h6l2 2h10v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/><path d="M3 13h18"/>',
+ club:'<path d="M12 3l2.4 5.5 5.6 1-4 4 1 6-5-2.9L7 19.5l1-6-4-4 5.6-1z"/>',
+ lupa:'<circle cx="10.5" cy="10.5" r="6.4"/><path d="M15.4 15.4L21 21"/>',
+ plano:'<rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>',
+ gente:'<circle cx="9" cy="8" r="3.1"/><path d="M3.6 19c.6-3.1 2.7-4.9 5.4-4.9S13.8 15.9 14.4 19"/><circle cx="17" cy="9.2" r="2.3"/><path d="M15.6 14.7c2.2-.4 4.1 1 4.6 4.3"/>',
+ nota:'<path d="M5.5 4h11a1.5 1.5 0 0 1 1.5 1.5V20H7a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M5.5 17H18"/><path d="M9 8h6M9 11h6"/>'
+};
+function render(){
+  if(enCaso())renderCaso(); else renderLobby();
+  renderNav(); screen.scrollTop=0;
+}
+function renderNav(){
+  const T=enCaso()
+   ? [['gente',IC.gente,'GENTE'],['plano',IC.plano,'PLANO',1],['cuaderno',IC.nota,'CUADERNO']]
+   : [['archivo',IC.archivo,'ARCHIVO'],['jugar',IC.lupa,'JUGAR',1],['club',IC.club,'CLUB']];
+  const cur=enCaso()?S.tab:TAB;
+  const nuevas=enCaso()&&S.seenClues<S.found.size;
+  nav.innerHTML=T.map(([k,ic,lab,hub])=>{
+    const on=cur===k?'on':'';
+    const svg=`<svg viewBox="0 0 24 24">${ic}</svg>`;
+    return hub
+      ? `<button class="hub ${on}" data-tab="${k}"><span class="disc">${svg}</span>${lab}</button>`
+      : `<button class="${on}" data-tab="${k}">${svg}${lab}${k==='cuaderno'&&nuevas?'<span class="dot"></span>':''}</button>`;
+  }).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.tab;
+    if(enCaso()){S.tab=k; if(k==='cuaderno')S.seenClues=S.found.size}
+    else{ /* desde el desenlace, cualquier pestaña devuelve al club: el caso ya está en el archivo */
+      if(S&&S.over){S=null;sel={c:null,r:null,m:null}}
+      TAB=k; }
+    render();
+  });
+}
+function topbar(){
+  const R=$('topR'),L=$('topL');
+  if(enCaso()){
+    $('topTtl').textContent=S.C.P.corto;
+    L.innerHTML='<button class="iconbtn" id="salir">‹</button>';
+    $('salir').onclick=()=>confirmSalir();
+    R.innerHTML=S.fuera
+      ? `<div class="pill low"><b>FUERA</b></div>`
+      : `<div class="pill act" id="goAcc">⚖ ACUSAR</div>
+         <div class="pill ${S.acc<=3?'low':''}"><b>${S.acc}</b></div>`;
+    if(!S.fuera)$('goAcc').onclick=()=>openAccuse();
+  }else{
+    $('topTtl').textContent='HUNT CLUB';
+    L.innerHTML='';
+    R.innerHTML=`<div class="pill">${rank().n}</div>`;
+  }
+}
+
+/* ============================================================
+   LOBBY
+   ============================================================ */
+function renderLobby(){
+  topbar();
+  if(S&&S.over)renderEnd();
+  else if(TAB==='jugar')renderSetup();
+  else if(TAB==='archivo')renderArchivo();
+  else renderClub();
+}
+
+function renderSetup(){
+  document.body.dataset.pack=setup.pack;
+  const mesa=setup.modo==='mesa';
+  if(mesa&&setup.dif==='facil')setup.dif='normal';
+  let h=`<h2 class="sec">CÓMO JUGÁIS</h2>
+   <div class="chips" style="margin-bottom:${mesa?'10px':'20px'}">
+     <div class="chip ${mesa?'':'on'}" data-m="solo"><div class="cn">En solitario</div><span class="cs">tú contra el caso</span></div>
+     <div class="chip ${mesa?'on':''}" data-m="mesa"><div class="cn">En mesa</div><span class="cs">cada uno con su móvil</span></div>
+   </div>`;
+  if(mesa){
+    h+=`<div class="card" style="margin-bottom:20px">
+      <div class="rl" style="margin-bottom:9px">CUÁNTOS SOIS</div>
+      <div class="nums">${[2,3,4,5,6,7,8].map(x=>`<div class="num ${setup.n===x?'on':''}" data-n="${x}">${x}</div>`).join('')}</div>
+      <div class="rl" style="margin:15px 0 9px">TU NÚMERO</div>
+      <div class="nums">${Array.from({length:setup.n},(_,i)=>i+1).map(x=>`<div class="num ${setup.yo===x?'on':''}" data-y="${x}">${x}</div>`).join('')}</div>
+      <div class="note" style="text-align:left;margin-top:13px">Repartíos los números sin repetir. Cada uno verá una parte distinta de lo que hay en las salas.${
+        setup.n>=7?' <b style="color:var(--accent2)">Con '+setup.n+' tocáis a muy poco cada uno</b>: se juega bien, pero hay que pedir mucho. Entre 3 y 5 es donde mejor está.':''}</div>
+    </div>`;
+  }
+  h+=`<h2 class="sec">ELIGE LA NOCHE</h2>`;
+  CAT.forEach(a=>{
+    const on=setup.pack===a.id?'on':'';
+    h+=`<div class="scard ${a.ok?on:'soon'}" ${a.ok?`data-a="${a.id}"`:''}>
+      <img class="scene" src="${FOTO.amb[a.id]}" alt="">
+      <div class="scrim"></div>
+      ${a.ok?'<div class="mark">✓</div>':'<div class="soonbadge">PRÓXIMAMENTE</div>'}
+      <div class="lab"><div class="n">${a.n}</div><div class="s">${a.s}</div></div></div>`;
+  });
+  h+=`<h2 class="sec" style="margin-top:20px">DIFICULTAD</h2><div class="chips">`;
+  /* En mesa, "Indicios claros" no vale: con solo dos mentirosos casi todo es público
+     y a alguien le puede tocar la pista que cierra el caso él solo, callado. */
+  Object.values(DIFS).filter(d=>!(mesa&&d.id==='facil')).forEach(d=>{
+    h+=`<div class="chip ${setup.dif===d.id?'on':''}" data-d="${d.id}">
+      <div class="cn">${d.n}</div><span class="cs">${d.desc.replace(' · ','<br>')}</span></div>`});
+  h+=`</div>${mesa?'<div class="note" style="text-align:left;margin-top:8px">En mesa hace falta gente que mienta: con la dificultad más suave casi todo sería público y alguien podría cerrar el caso sin hablar con nadie.</div>':''}<h2 class="sec" style="margin-top:20px">CÓDIGO DEL CASO</h2>
+    <div class="seedrow">
+      <input class="code" id="seed" maxlength="18" value="${setup.seed||randSeed()}" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <button class="reroll" id="rr">⟳</button>
+    </div>
+    <div class="note" style="margin-bottom:10px">${mesa
+      ?'Este código tiene que ser <b>el mismo en los '+setup.n+' móviles</b>, y también el ambiente y la dificultad. Lo que cambia es tu número.'
+      :'El código genera el caso entero. Pásaselo a alguien y jugaréis exactamente el mismo, cada uno en su móvil.'}</div>
+    <button class="btn primary" id="start">${mesa?'EMPEZAR · JUGADOR '+setup.yo:'EMPEZAR LA NOCHE'}</button>`;
+  screen.innerHTML=h;
+  /* el código se limpia según se escribe: así el límite cuenta caracteres útiles,
+     no espacios ni signos que luego se van a tirar */
+  const limpia=v=>v.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,10);
+  const keep=()=>{const i=$('seed');const v=limpia(i.value);if(v!==i.value)i.value=v;setup.seed=v};
+  screen.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>{keep();setup.pack=el.dataset.a;renderSetup()});
+  screen.querySelectorAll('[data-d]').forEach(el=>el.onclick=()=>{keep();setup.dif=el.dataset.d;renderSetup()});
+  screen.querySelectorAll('[data-m]').forEach(el=>el.onclick=()=>{keep();setup.modo=el.dataset.m;renderSetup()});
+  screen.querySelectorAll('[data-n]').forEach(el=>el.onclick=()=>{keep();setup.n=+el.dataset.n;
+    if(setup.yo>setup.n)setup.yo=setup.n; renderSetup()});
+  screen.querySelectorAll('[data-y]').forEach(el=>el.onclick=()=>{keep();setup.yo=+el.dataset.y;renderSetup()});
+  $('seed').oninput=keep;
+  $('rr').onclick=()=>{setup.seed=randSeed();renderSetup()};
+  $('start').onclick=()=>{
+    const s=limpia($('seed').value||'')||randSeed();
+    setup.seed=''; sel={c:null,r:null,m:null};
+    newGame(setup.pack,setup.dif,s,setup.modo,setup.n,setup.yo);
+  };
+}
+
+function renderArchivo(){
+  const L=ST.log, w=wins(), j=L.filter(x=>!x.ab).length, pct=j?Math.round(w/j*100):0;
+  let h=`<h2 class="sec">ARCHIVO DE CASOS</h2>
+   <div class="stat3">
+     <div class="stat"><b>${L.length}</b><span>ABIERTOS</span></div>
+     <div class="stat"><b>${w}</b><span>CERRADOS</span></div>
+     <div class="stat"><b>${j?pct+'%':'—'}</b><span>ACIERTO</span></div>
+   </div>`;
+  if(!L.length){
+    h+=`<div class="empty"><div class="ei">▤</div>
+      <div class="et">Todavía no has abierto ningún caso.<br>Lo que resuelvas quedará aquí, con su código.</div></div>`;
+  }else{
+    L.forEach((e,i)=>{
+      const P=PACKS[e.pack], f=new Date(e.t);
+      h+=`<div class="logrow" data-i="${i}">
+        <div class="vd ${e.ab?'ab':(e.win?'win':'lose')}"></div>
+        <div><div class="lc">${e.seed}</div><div class="lm">${P?P.nombre:e.pack} · ${DIFS[e.dif].n}${e.mesa?` · mesa de ${e.mesa}`:''}</div></div>
+        <div class="lr">${e.ab?'ABANDONADO':(e.win?'RESUELTO':'FALLADO')}<br>${f.getDate()}/${f.getMonth()+1}</div></div>`;
+    });
+  }
+  screen.innerHTML=h;
+  screen.querySelectorAll('[data-i]').forEach(el=>el.onclick=()=>openLog(+el.dataset.i));
+}
+function openLog(i){
+  const e=ST.log[i],P=PACKS[e.pack],f=new Date(e.t);
+  openSheetRaw(e.seed,
+   `<p style="font-family:var(--serif);font-size:17.5px;line-height:1.55;color:var(--dim)">
+      ${P?P.nombre:e.pack} · ${DIFS[e.dif].n}<br>
+      ${f.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</p>
+    <div class="clue ${e.win?'hard':''}" style="margin-top:14px">
+      <div class="src">${e.ab?'CASO ABANDONADO':(e.win?'CASO CERRADO':'CASO PERDIDO')}</div>
+      <div class="txt">${e.ab
+        ?'Lo dejaste a medias. El código sigue vivo: esta noche te espera igual que la dejaste.'
+        :(e.win
+        ?`Acertaste los tres, con ${e.left} ${e.left===1?'acción':'acciones'} de sobra${e.fails?` y ${e.fails} ${e.fails===1?'careo fallido':'careos fallidos'}`:' y sin fallar un careo'}.`
+        :'Acusaste a quien no era. El código sigue siendo el mismo si quieres la revancha.')}</div></div>
+    <button class="btn primary" id="again">JUGAR ESTE CASO</button>
+    <button class="btn ghost" id="cl">CERRAR</button>`);
+  $('again').onclick=()=>{closeSheet();S=null;sel={c:null,r:null,m:null};newGame(e.pack,e.dif,e.seed)};
+  $('cl').onclick=()=>{closeSheet();render()};
+}
+
+function renderClub(){
+  const R=rank(),N=nextRank(),w=wins();
+  const pct=N?Math.min(100,Math.round((w-R.min)/(N.min-R.min)*100)):100;
+  let h=`<h2 class="sec">TU SOCIO</h2>
+   <div class="rank"><div class="rn">${R.n}</div><div class="rd">${R.d}</div>
+     <div class="bar"><i style="width:${Math.max(3,pct)}%"></i></div>
+     <div class="note" style="text-align:left;margin-top:9px">${
+       N?`${N.min-w} ${N.min-w===1?'caso':'casos'} para <b style="color:var(--accent2)">${N.n}</b>`
+        :'Has llegado arriba del todo.'}</div></div>
+   <h2 class="sec" style="margin-top:20px">CONDECORACIONES</h2><div class="meds">`;
+  MEDS.forEach(m=>{h+=`<div class="med ${ST.meds[m.id]?'got':''}">
+    <div class="mi" style="color:${ST.meds[m.id]?'var(--accent2)':'var(--dim)'}">${m.i}</div>
+    <div class="mn">${m.n}</div><div class="md">${m.d}</div></div>`});
+  const hechos=new Set(ST.log.filter(x=>x.win).map(x=>x.pack));
+  h+=`</div><h2 class="sec" style="margin-top:22px">LA COLECCIÓN</h2>
+    <p class="lead">Ocho noches distintas. El motor es el mismo; lo que cambia es el plano, el elenco, las armas y la clase de secretos que esconde la gente. Cierra un caso en cada una.</p>
+    <div class="note" style="text-align:left;margin-bottom:12px"><b style="color:var(--accent2)">${hechos.size} de ${CAT.length}</b> resueltos</div>`;
+  CAT.forEach(a=>{
+    const hecho=hechos.has(a.id);
+    h+=`<div class="scard ${hecho?'':'soon'}" style="height:104px">
+      <img class="scene" src="${FOTO.amb[a.id]}" alt="">
+      <div class="scrim"></div>
+      ${hecho?'<div class="mark" style="opacity:1;transform:none">✓</div>':''}
+      <div class="lab"><div class="n" style="font-size:14px">${a.n}</div>
+        <div class="s" style="font-size:12.5px">${hecho?'caso cerrado':a.s}</div></div></div>`});
+  screen.innerHTML=h;
+}
+
+/* ============================================================
+   CASO
+   ============================================================ */
+function renderCaso(){
+  topbar();
+  if(S.tab==='plano')renderPlan();
+  else if(S.tab==='gente')renderPeople();
+  else renderNotes();
+}
+
+function renderPlan(){
+  const C=S.C,P=C.P,foto=FOTO.tab[S.pack];
+  let g='';
+  for(let i=0;i<9;i++){
+    const cls=['rm',S.rooms.has(i)?'done':'',i===C.bodyRoom?'body':''].filter(Boolean).join(' ');
+    g+=`<div class="${cls}" data-room="${i}">
+      <div class="fx" style="background-image:url(${foto});background-position:${(i%3)*50}% ${Math.floor(i/3)*50}%"></div>
+      ${i===C.bodyRoom?'<div class="mk">✕</div>':''}
+      ${S.rooms.has(i)?'<div class="ck">✓</div>':''}
+      <div class="lab"><div class="ln">${P.rooms[i].n}</div><div class="lm">${P.rooms[i].mat}</div></div>
+    </div>`;
+  }
+  const dl=P.lugar.startsWith('el ')?'DEL '+P.lugar.slice(3):'DE '+P.lugar;
+  screen.innerHTML=`<h2 class="sec">EL PLANO ${dl.toUpperCase()}</h2>
+    <p class="lead" style="margin-bottom:10px">${P.victima.n} apareció muert${P.victima.g==='f'?'a':'o'} en <b style="color:var(--ink)">${SALA(P,C.bodyRoom)}</b> durante ${P.horaCrimen}.</p>
+    <div id="plan">${g}</div>
+    <div class="note">${9-S.rooms.size} salas sin registrar · cada registro cuesta 1 acción</div>`;
+  screen.querySelectorAll('.rm').forEach(el=>el.onclick=()=>inspect(+el.dataset.room));
+}
+function inspect(i){
+  if(S.rooms.has(i)){showRoom(i,false);return}
+  if(S.fuera){sheetMsg('ESTÁS FUERA','Ya no investigas. Pero tu cuaderno sigue ahí, y la mesa sigue hablando.');return}
+  if(S.acc<1){sheetMsg('SIN TIEMPO','No queda noche. Solo puedes acusar.');return}
+  S.rooms.add(i); spend(1);
+  S.C.clues.filter(c=>c.src.t==='room'&&c.src.i===i&&mia(c)).forEach(c=>S.found.add(c.id));
+  showRoom(i,true); render();
+}
+function showRoom(i,fresh){
+  const P=S.C.P, todas=S.C.clues.filter(c=>c.src.t==='room'&&c.src.i===i);
+  const cs=todas.filter(mia), ajenas=todas.length-cs.length;
+  const d=P.rooms[i].d[0].toUpperCase()+P.rooms[i].d.slice(1);
+  const body=cs.length?cs.map(c=>`<div class="clue ${c.obj!=null?'obj':(c.hard?'hard':'')}"><div class="txt">${c.txt}</div></div>`).join('')
+    :`<div class="clue"><div class="txt" style="color:var(--dim)">Nada. ${d} está tal y como se dejó. Una acción gastada.</div></div>`;
+  const aviso=ajenas?`<div class="clue" style="border-left-color:color-mix(in srgb,var(--accent) 60%,transparent)">
+      <div class="txt" style="color:var(--accent2)">Aquí hay ${ajenas===1?'algo más que ha encontrado otro':'más cosas que han encontrado otros'} y que tú no has visto. Pregunta.</div></div>`:'';
+  openSheet(P.rooms[i].n.toUpperCase(),
+    `<p style="color:var(--dim);font-size:14px;margin-bottom:14px">${d} · suelo de ${P.rooms[i].mat}</p>${body}${aviso}`,
+    fresh?'SEGUIR':'CERRAR');
+}
+
+function renderPeople(){
+  const P=S.C.P;
+  screen.innerHTML=`<h2 class="sec">LOS QUE ESTABAN EN ${P.lugar.toUpperCase()}</h2>
+    <p class="lead">Interrogar cuesta 1 acción. Carear cuesta otra, y solo se quiebra si le pones delante una pieza suya hallada donde jura no haber estado. Quien no puedas descartar al final es tu culpable.</p>`
+    +P.chars.map((_,i)=>personCard(i)).join('');
+  screen.querySelectorAll('[data-per]').forEach(el=>el.onclick=()=>openPerson(+el.dataset.per));
+}
+function personCard(i){
+  const C=S.C,P=C.P,ch=P.chars[i],inter=S.chars.has(i),st=S.careo[i];
+  const cleared=facts().some(f=>f.k==='atRoom'&&f.c===i&&f.r!==C.crimeRoom);
+  let tags='';
+  if(!inter)tags+='<span class="tag">sin interrogar</span>';
+  if(st==='ok')tags+='<span class="tag lie">confesó su secreto</span>';
+  if(st==='fail')tags+='<span class="tag">se cierra en banda</span>';
+  if(cleared)tags+='<span class="tag cleared">fuera de sospecha</span>';
+  else if(inter)tags+='<span class="tag open">sin confirmar</span>';
+  return `<div class="card tap" data-per="${i}">
+    <div class="row"><div class="av">${ch.ini}</div>
+      <div style="min-width:0"><div class="nm">${ch.n}</div><div class="rl">${ch.r}</div></div></div>
+    ${inter?`<div class="claim">«Durante ${P.horaCrimen} estuve en ${SALA(P,C.claim[i])}.»</div>`:''}
+    <div>${tags}</div></div>`;
+}
+function openPerson(i){
+  const C=S.C,P=C.P,ch=P.chars[i],inter=S.chars.has(i);
+  let body=`<div class="row" style="margin-bottom:14px"><div class="av">${ch.ini}</div>
+    <div><div class="nm">${ch.n}</div><div class="rl">${ch.r}</div></div></div>`;
+  if(inter){
+    body+=`<div class="claim">«Durante ${P.horaCrimen} estuve en ${SALA(P,C.claim[i])}.»</div>`;
+    C.clues.filter(c=>c.src.t==='char'&&c.src.i===i&&S.found.has(c.id))
+      .forEach(c=>body+=`<div class="clue ${c.hard?'hard':''}" style="margin-top:14px"><div class="txt">${c.txt}</div></div>`);
+    if(S.careo[i]==='ok')
+      body+=`<div class="clue obj" style="margin-top:14px"><div class="src">CONFESIÓN</div><div class="txt">Estuvo en <b>${SALA(P,C.trueRoom[i])}</b>. ${cap(C.secreto[i])}.</div></div>`;
+  }else body+=`<p style="font-family:var(--serif);font-size:17px;color:var(--dim)">Aún no has hablado con ${ch.n.split(' ')[0]}.</p>`;
+  const b=[];
+  if(!inter)b.push('<button class="btn primary" data-a="int">INTERROGAR · 1</button>');
+  else if(S.careo[i]!=='ok')b.push('<button class="btn" data-a="careo">CAREAR · 1</button>');
+  b.push('<button class="btn ghost" data-a="x">CERRAR</button>');
+  openSheetRaw(ch.n.toUpperCase(),body+b.join(''));
+  sheet.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>{
+    const a=el.dataset.a;
+    if(a==='x'){closeSheet();render()}
+    else if(a==='int')interrogate(i);
+    else careoPicker(i);
+  });
+}
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+function interrogate(i){
+  if(S.fuera){sheetMsg('ESTÁS FUERA','Ya no investigas. Pero tu cuaderno sigue ahí, y la mesa sigue hablando.');return}
+  if(S.acc<1){sheetMsg('SIN TIEMPO','No queda noche. Solo puedes acusar.');return}
+  S.chars.add(i); spend(1);
+  S.C.clues.filter(c=>c.src.t==='char'&&c.src.i===i).forEach(c=>S.found.add(c.id));
+  openPerson(i); topbar(); renderNav();
+}
+function careoPicker(i){
+  const P=S.C.P, objs=foundClues().filter(c=>c.obj!=null);
+  if(!objs.length){sheetMsg('NADA QUE PONERLE DELANTE','Un careo sin pruebas es una conversación. Registra salas hasta encontrar algo que contradiga a alguien.');return}
+  let body=`<p style="font-family:var(--serif);font-size:17px;color:var(--dim);margin-bottom:14px">Elige la pieza que desmonta su versión. Si te equivocas, se cierra y pierdes la acción igual.</p>`;
+  objs.forEach(c=>body+=`<div class="card tap" data-c="${c.id}">
+    <div style="font-family:var(--serif);font-size:16px">${c.txt}</div>
+    <div class="rl" style="margin-top:6px">Hallado en ${SALA(P,c.objRoom)}</div></div>`);
+  body+='<button class="btn ghost" data-a="x">VOLVER</button>';
+  openSheetRaw('CAREO CON '+P.chars[i].n.toUpperCase(),body);
+  sheet.querySelectorAll('[data-c]').forEach(el=>el.onclick=()=>doCareo(i,+el.dataset.c));
+  sheet.querySelector('[data-a]').onclick=()=>openPerson(i);
+}
+function doCareo(i,clueId){
+  if(S.fuera){sheetMsg('ESTÁS FUERA','Ya no investigas.');return}
+  if(S.acc<1){sheetMsg('SIN TIEMPO','No queda noche. Solo puedes acusar.');return}
+  const C=S.C,P=C.P,r=mulberry32(hash(S.seed+'|'+i+'|'+clueId))();
+  const cl=C.clues.find(c=>c.id===clueId);
+  spend(1);
+  if(C.liars.includes(i)&&cl.obj===i&&cl.objRoom===C.trueRoom[i]){
+    S.careo[i]='ok';
+    openSheet('SE QUIEBRA',
+      `<div class="clue obj"><div class="src">${P.chars[i].n}</div>
+        <div class="txt" style="font-style:italic">«${P.confesion[Math.floor(r*P.confesion.length)]}»</div></div>
+       <p style="font-family:var(--serif);font-size:17px;margin-top:14px">Admite que durante ${P.horaCrimen} estuvo en <b>${SALA(P,C.trueRoom[i])}</b>. ${cap(C.secreto[i])}.</p>`,'SEGUIR');
+  }else{
+    if(S.careo[i]!=='ok')S.careo[i]='fail';
+    S.careoFails++;
+    openSheet('AGUANTA',
+      `<div class="clue"><div class="src">${P.chars[i].n}</div>
+        <div class="txt" style="font-style:italic">«${P.negacion[Math.floor(r*P.negacion.length)]}»</div></div>
+       <p class="note" style="margin-top:14px;text-align:left">Acción gastada. Puedes volver a intentarlo con otra pieza.</p>`,'SEGUIR');
+  }
+  topbar(); renderNav();
+}
+
+function renderNotes(){
+  const C=S.C,P=C.P,cs=foundClues(),pos=solutions(C,facts());
+  const u=k=>[...new Set(pos.map(h=>h[k]))].length;
+  let h=`<h2 class="sec">CUADERNO</h2>
+   <div class="stat3">
+     <div class="stat"><b>${u('c')}</b><span>CULPABLES</span></div>
+     <div class="stat"><b>${u('r')}</b><span>SALAS</span></div>
+     <div class="stat"><b>${u('m')}</b><span>MEDIOS</span></div></div>`;
+  if(!cs.length)h+=`<div class="empty"><div class="ei">✎</div><div class="et">El cuaderno está en blanco.<br>Empieza por ${SALA(P,C.bodyRoom)}: donde está el cuerpo siempre hay algo.</div></div>`;
+  else{
+    const byR=cs.filter(c=>c.src.t==='room'), byC=cs.filter(c=>c.src.t==='char');
+    if(byR.length){h+='<h2 class="sec" style="margin-top:18px">HALLAZGOS</h2>';
+      byR.forEach(c=>h+=`<div class="clue ${c.obj!=null?'obj':(c.hard?'hard':'')}"><div class="src">${P.rooms[c.src.i].n}</div><div class="txt">${c.txt}</div></div>`)}
+    if(byC.length){h+='<h2 class="sec" style="margin-top:18px">TESTIMONIOS</h2>';
+      byC.forEach(c=>h+=`<div class="clue ${c.hard?'hard':''}"><div class="src">${P.chars[c.src.i].n}</div><div class="txt">${c.txt}</div></div>`)}
+    const cf=Object.keys(S.careo).filter(k=>S.careo[k]==='ok');
+    if(cf.length){h+='<h2 class="sec" style="margin-top:18px">CONFESIONES</h2>';
+      cf.forEach(k=>h+=`<div class="clue obj"><div class="src">${P.chars[k].n}</div><div class="txt">Estuvo en ${SALA(P,C.trueRoom[k])}. ${cap(C.secreto[k])}.</div></div>`)}
+  }
+  if(S.modo==='mesa'){
+    h+='<h2 class="sec" style="margin-top:20px">LO QUE ME HAN CONTADO</h2>';
+    if(!S.notas.length)
+      h+=`<p class="lead">Nada todavía. Lo que te cuenten los demás se apunta aquí y cuenta en tu deducción igual que lo que has visto con tus ojos — <b style="color:var(--ink)">aunque sea mentira</b>.</p>`;
+    else S.notas.forEach((nt,k)=>{
+      h+=`<div class="clue ${nt.fio?'hard':''}" style="opacity:${nt.fio?1:.5}">
+        <div class="src">${nt.quien} · ${nt.fio?'me fío':'dudoso'}</div>
+        <div class="txt">${nt.txt}</div>
+        <div style="display:flex;gap:7px;margin-top:8px">
+          <button class="minibtn" data-fio="${k}">${nt.fio?'MARCAR DUDOSO':'VOLVER A FIARME'}</button>
+          <button class="minibtn" data-del="${k}">BORRAR</button></div></div>`});
+    h+=`<button class="btn" id="anotar">ANOTAR LO QUE ME HAN CONTADO</button>`;
+    if(S.fuera)h+=`<button class="btn ghost" id="destapar">VER LA SOLUCIÓN</button>`;
+  }
+  screen.innerHTML=h; S.seenClues=S.found.size;
+  if(S.modo==='mesa'){
+    $('anotar').onclick=()=>notaPaso1();
+    if(S.fuera)$('destapar').onclick=()=>{
+      openSheet('¿HA TERMINADO LA MESA?',
+       `<p style="font-family:var(--serif);font-size:17.5px;line-height:1.5">Si lo destapas ahora y queda alguien en pie, le estropeas la partida. Espera a que alguien cierre el caso.</p>
+        <button class="btn primary" id="sipues">SÍ, DESTÁPALO</button>`,'ESPERAR');
+      $('sipues').onclick=()=>{S.over='lose';closeSheet();TAB='jugar';render()};
+    };
+    screen.querySelectorAll('[data-fio]').forEach(b=>b.onclick=()=>{
+      const k=+b.dataset.fio; S.notas[k].fio=!S.notas[k].fio; render()});
+    screen.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+      S.notas.splice(+b.dataset.del,1); render()});
+  }
+}
+
+/* ---------- anotar lo que te dicen ----------
+   La app NO comprueba nada: si te han mentido, tu contador miente contigo.
+   Por eso cada nota lleva quién te la dio y se puede marcar como dudosa. */
+let nota={tipo:null,a:null,b:null,quien:null};
+function notaPaso1(){
+  nota={tipo:null,a:null,b:null,quien:null};
+  openSheetRaw('¿QUÉ TE HAN DICHO?',
+   `<p style="font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--dim);margin-bottom:14px">Apunta lo que te han contado. Entrará en tu deducción como una pista más, y nadie va a comprobar si es verdad.</p>
+    <div class="opt" data-t="donde" style="margin-bottom:8px">Alguien estuvo en una sala<small>«Fulano estuvo en la Cocina»</small></div>
+    <div class="opt" data-t="arma" style="margin-bottom:8px">Un arma queda descartada<small>«la daga está limpia»</small></div>
+    <div class="opt" data-t="sala" style="margin-bottom:8px">El crimen fue en una sala<small>«lo mataron en la Bodega»</small></div>
+    <button class="btn ghost" id="x">VOLVER</button>`);
+  sheet.querySelectorAll('[data-t]').forEach(el=>el.onclick=()=>{nota.tipo=el.dataset.t;notaPaso2()});
+  $('x').onclick=()=>{closeSheet();render()};
+}
+function notaPaso2(){
+  const P=S.C.P;
+  if(nota.tipo==='donde'&&nota.a===null){
+    openSheetRaw('¿DE QUIÉN HABLAN?',
+      `<div class="grid">${P.chars.map((c,i)=>`<div class="opt" data-i="${i}">${c.n}<small>${c.r}</small></div>`).join('')}</div>
+       <button class="btn ghost" id="x">VOLVER</button>`);
+    sheet.querySelectorAll('[data-i]').forEach(el=>el.onclick=()=>{nota.a=+el.dataset.i;notaPaso2()});
+    $('x').onclick=()=>notaPaso1(); return;
+  }
+  if(nota.tipo==='arma'){
+    openSheetRaw('¿QUÉ ARMA DESCARTAN?',
+      `<div class="grid">${P.means.map((m,i)=>`<div class="opt" data-i="${i}">${m.n}</div>`).join('')}</div>
+       <button class="btn ghost" id="x">VOLVER</button>`);
+    sheet.querySelectorAll('[data-i]').forEach(el=>el.onclick=()=>{nota.b=+el.dataset.i;notaPaso3()});
+    $('x').onclick=()=>notaPaso1(); return;
+  }
+  const ttl=nota.tipo==='sala'?'¿DÓNDE DICEN QUE FUE?':'¿EN QUÉ SALA DICEN QUE ESTUVO?';
+  openSheetRaw(ttl,
+    `<div class="grid">${P.rooms.map((r,i)=>`<div class="opt" data-i="${i}">${r.n}<small>${r.d}</small></div>`).join('')}</div>
+     <button class="btn ghost" id="x">VOLVER</button>`);
+  sheet.querySelectorAll('[data-i]').forEach(el=>el.onclick=()=>{nota.b=+el.dataset.i;notaPaso3()});
+  $('x').onclick=()=>{if(nota.tipo==='donde'){nota.a=null;notaPaso2()}else notaPaso1()};
+}
+function notaPaso3(){
+  const otros=Array.from({length:S.n},(_,i)=>i+1).filter(x=>x!==S.yo);
+  openSheetRaw('¿QUIÉN TE LO HA DICHO?',
+   `<div class="nums" style="margin-bottom:12px">${otros.map(x=>`<div class="num" data-q="${x}">${x}</div>`).join('')}</div>
+    <div class="note" style="text-align:left">Queda apuntado con su número. Si luego resulta que te la jugó, puedes marcar la nota como dudosa y ver qué queda sin ella.</div>
+    <button class="btn ghost" id="x">VOLVER</button>`);
+  sheet.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{nota.quien=+el.dataset.q;guardaNota()});
+  $('x').onclick=()=>notaPaso2();
+}
+function guardaNota(){
+  const P=S.C.P; let hecho,txt;
+  if(nota.tipo==='donde'){hecho={k:'atRoom',c:nota.a,r:nota.b};
+    txt=`${P.chars[nota.a].n} estuvo en ${SALA(P,nota.b)} durante ${P.horaCrimen}.`}
+  else if(nota.tipo==='arma'){hecho={k:'meansNot',v:nota.b};
+    txt=`${cap(P.means[nota.b].n)} queda descartada como arma.`}
+  else{hecho={k:'roomIs',v:nota.b};
+    txt=`El crimen fue en ${SALA(P,nota.b)}.`}
+  S.notas.push({hecho,txt,quien:'Jugador '+nota.quien,fio:true});
+  S.tab='cuaderno'; closeSheet(); render();
+}
+
+/* ---------- abandonar el caso ---------- */
+function confirmSalir(){
+  const virgen=S.acc===S.dif.acc;   /* no ha gastado nada: fue equivocarse de puerta */
+  openSheetRaw('DEJARLO AQUÍ',
+   `<p style="font-family:var(--serif);font-size:17.5px;line-height:1.55;color:var(--dim)">${
+     virgen ? 'Aún no has movido ficha, así que esto no deja rastro: vuelves a elegir noche y ya está.'
+            : `Perderás lo investigado. El caso quedará en el archivo como abandonado, y el código <b style="color:var(--accent2)">${S.seed}</b> te devuelve exactamente esta misma noche cuando quieras.`
+   }</p>
+    <button class="btn primary" id="si">ELEGIR OTRA NOCHE</button>
+    <button class="btn ghost" id="no">SEGUIR AQUÍ</button>`);
+  $('no').onclick=()=>{closeSheet();render()};
+  $('si').onclick=()=>{
+    if(!virgen)logCase('ab');
+    setup.pack=S.pack; setup.dif=S.dif.id; setup.seed=S.seed;
+    S=null; sel={c:null,r:null,m:null}; TAB='jugar';
+    closeSheet(); render();
+  };
+}
+
+/* ---------- acusación, en hoja ---------- */
+function openAccuse(){
+  const P=S.C.P;
+  const g=(arr,k,lab)=>`<h2 class="sec" style="margin-top:16px">${lab}</h2><div class="grid">`+
+    arr.map((x,i)=>`<div class="opt ${sel[k]===i?'on':''}" data-k="${k}" data-i="${i}">${x.a}${x.b?`<small>${x.b}</small>`:''}</div>`).join('')+'</div>';
+  const listo=sel.c!=null&&sel.r!=null&&sel.m!=null;
+  openSheetRaw('LA ACUSACIÓN',
+    `<p style="font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--dim)">Una sola. Si aciertas los tres, el caso se cierra. Si fallas en uno, te equivocaste de persona y ya no hay vuelta.</p>
+     ${g(P.chars.map(c=>({a:c.n,b:c.r})),'c','QUIÉN')}
+     ${g(P.rooms.map(r=>({a:r.n,b:r.d})),'r','DÓNDE')}
+     ${g(P.means.map(m=>({a:m.n})),'m','CON QUÉ')}
+     <button class="btn primary" id="go" ${listo?'':'disabled'}>ACUSAR</button>
+     <button class="btn ghost" id="bk">SEGUIR INVESTIGANDO</button>`);
+  sheet.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+    const t=sheet.scrollTop; sel[o.dataset.k]=+o.dataset.i; openAccuse(); sheet.scrollTop=t});
+  $('bk').onclick=()=>{closeSheet();render()};
+  if(listo)$('go').onclick=()=>confirmAccuse();
+}
+function confirmAccuse(){
+  const C=S.C,P=C.P;
+  openSheet('¿SEGURO?',
+   `<p style="font-family:var(--serif);font-size:18px;line-height:1.5">Acusas a <b>${P.chars[sel.c].n}</b> de matar a ${P.victima.n} en <b>${P.rooms[sel.r].n}</b> con <b>${P.means[sel.m].n}</b>.</p>
+    <p class="note" style="text-align:left;margin-top:12px">No hay segunda oportunidad.</p>
+    <button class="btn primary" id="yes">LO SOSTENGO</button>`,'VOLVER');
+  $('yes').onclick=()=>{
+    const win=sel.c===C.culprit&&sel.r===C.crimeRoom&&sel.m===C.crimeMeans;
+    if(!win&&S.modo==='mesa'){
+      /* en mesa nadie destapa el caso al fallar: te quedas sentado, sin acciones
+         y sin nada que perder, que es cuando mentir sale gratis */
+      S.fuera=true; S.acc=0; logCase('lose');
+      openSheet('ESTÁS FUERA',
+       `<p style="font-family:var(--serif);font-size:18px;line-height:1.5">Te equivocaste. Ya no puedes investigar ni volver a acusar.</p>
+        <p style="font-family:var(--serif);font-size:18px;line-height:1.5;margin-top:12px;color:var(--dim)">Pero sigues en la mesa, conservas tu cuaderno y nadie sabe lo que tienes. Habla. Enseña lo que quieras. Enseña lo que no es.</p>`,'SEGUIR EN LA MESA');
+      return;
+    }
+    S.over=win?'win':'lose'; logCase(S.over); closeSheet(); TAB='jugar'; render();
+  };
+}
+
+function renderEnd(){
+  const C=S.C,P=C.P,win=S.over==='win';
+  let h=`<div class="hero"><div class="verdict ${win?'win':'lose'}">${win?'CASO CERRADO':'CASO PERDIDO'}</div>
+    <div class="sub">${win?'Acertaste los tres.':'Acusaste a quien no era.'}</div></div><div class="rule"></div>
+    <p class="lead"><b style="color:var(--ink)">${P.chars[C.culprit].n}</b> mató a ${P.victima.n} en <b style="color:var(--ink)">${SALA(P,C.crimeRoom)}</b> con <b style="color:var(--ink)">${P.means[C.crimeMeans].n}</b>${C.moved?`, y arrastró el cuerpo hasta ${SALA(P,C.bodyRoom)}.`:'.'}</p>
+    <h2 class="sec">LO QUE ESCONDÍA CADA UNO</h2>`;
+  P.chars.forEach((ch,i)=>{
+    const cul=i===C.culprit, mie=C.liars.includes(i);
+    h+=`<div class="card"><div class="row"><div class="av">${ch.ini}</div>
+      <div><div class="nm">${ch.n}</div><div class="rl">${ch.r}</div></div></div>
+      <div class="claim">Dijo: ${P.rooms[C.claim[i]].n} · Estuvo: ${P.rooms[C.trueRoom[i]].n}</div>
+      <div style="font-family:var(--serif);font-size:16px;margin-top:10px;color:${cul?'var(--accent)':'var(--dim)'}">
+      ${cul?'Fue quien lo hizo.':(mie?cap(C.secreto[i])+'. Por eso mintió.':'Dijo la verdad desde el principio.')}</div></div>`});
+  h+=`<div class="rule"></div><div class="code">${S.seed}</div>
+    <div class="note" style="margin-top:6px">Este era el código del caso. Quien lo introduzca juega exactamente el mismo.</div>
+    <button class="btn primary" id="again">OTRO CASO</button>
+    <button class="btn ghost" id="menu">VOLVER AL CLUB</button>`;
+  screen.innerHTML=h;
+  $('again').onclick=()=>{const p=S.pack,d=S.dif.id;S=null;sel={c:null,r:null,m:null};newGame(p,d,randSeed())};
+  $('menu').onclick=()=>{S=null;sel={c:null,r:null,m:null};TAB='jugar';render()};
+}
+
+/* ---------- hoja ---------- */
+function openSheetRaw(t,h){sheet.innerHTML=(t?`<h3>${t}</h3>`:'')+h;modal.classList.add('on')}
+function openSheet(t,h,b){
+  openSheetRaw(t,h+`<button class="btn primary" id="sheetOk">${b||'CERRAR'}</button>`);
+  $('sheetOk').onclick=()=>{closeSheet();render()};
+}
+function sheetMsg(t,m){openSheet(t,`<p style="font-family:var(--serif);font-size:17px;line-height:1.5">${m}</p>`)}
+function closeSheet(){modal.classList.remove('on');sheet.innerHTML=''}
+modal.querySelector('.bd').onclick=()=>{closeSheet();render()};
+
+/* ---------- gestos: nada de zoom ni rebote ---------- */
+['gesturestart','gesturechange','gestureend'].forEach(e=>document.addEventListener(e,ev=>ev.preventDefault(),{passive:false}));
+let lastT=0;
+document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastT<300)e.preventDefault();lastT=n},{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
+
+/* ---------- se guarda en el móvil para poder jugar sin cobertura ---------- */
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))
+  addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+/* ---------- arranque ---------- */
+render();
+setTimeout(()=>$('splash').classList.add('out'),1450);
+setTimeout(()=>{const s=$('splash');if(s)s.remove()},2100);
+</script>
+</body>
+</html>

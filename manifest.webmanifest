@@ -1,0 +1,15 @@
+{
+  "name": "Hunt Club",
+  "short_name": "Hunt Club",
+  "description": "Juego de misterio y deducción. Nadie dice toda la verdad; solo uno mató.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0a0c",
+  "theme_color": "#0b0a0c",
+  "lang": "es",
+  "icons": [
+    { "src": "assets/icon.webp", "sizes": "448x448", "type": "image/webp", "purpose": "any" }
+  ]
+}
